@@ -1,0 +1,2 @@
+# ARAJ
+Automaation reaaliaikajärjestelmät - harkkatyö
