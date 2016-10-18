@@ -1,0 +1,1 @@
+C:\vs2015_workspace\Tut.Ase.TraxsterRobotApp\Tut.Ase.TraxsterRobotApp\Tut.Ase.TraxsterRobotApp.csproj;x86
