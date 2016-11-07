@@ -30,6 +30,7 @@ namespace Tut.Ase.TraxsterRobotApp
         public async System.Threading.Tasks.Task run()
         {
             // TODO: Implement your app here!
+            await new MainLogic(robot).Initialize();
         }
     }
 }

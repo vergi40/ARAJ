@@ -100,7 +100,9 @@
     </Compile>
     <Compile Include="AppLogic.cs" />
     <Compile Include="DeviceConstants.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="IUiDataSync.cs" />
+    <Compile Include="MainLogic.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
