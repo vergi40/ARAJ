@@ -15,10 +15,14 @@ namespace Tut.Ase.TraxsterRobotApp
         private Robot _robot;
         private bool _emergencyStop;
 
+        private Enums.MainLogicStates _state;
+
         public MainLogic(Robot robot)
         {
             _robot = robot;
             _emergencyStop = false;
+
+            _state = Enums.MainLogicStates.Stopped;
 
         }
 
@@ -26,8 +30,9 @@ namespace Tut.Ase.TraxsterRobotApp
         /// Initialize different threads
         /// </summary>
         /// <returns></returns>
-        public async Task Initialize()
+        public async Task RunLogic()
         {
+            bool notRunning = true;
             // Thread: Sensor observing for emergency stop
             var task1 = ObserveEmergencyStop();
 
@@ -36,6 +41,50 @@ namespace Tut.Ase.TraxsterRobotApp
 
             // Thread: Controlling the robot
             var task3 = RunRobot();
+
+            while (true)
+            {
+                // Jos logiikka ei vielä käynnissä
+                if (notRunning)
+                {
+                    // Thread: Sensor observing for emergency stop
+                    task1.Initialize();
+
+                    // Thread: Sensor reading
+                    task2.Initialize();
+
+                    // Thread: Controlling the robot
+                    task3.Initialize();
+
+                    notRunning = false;
+                }
+                
+                try
+                {
+                    // Tee jotain staten mukaan
+
+                    // Run
+
+                    // Stopped
+
+                    // Emergency
+
+
+
+
+
+                }
+                catch (EmergencyStopException)
+                {
+                    // lopeta runmode
+                    task1.Stop();
+
+                    // Mene hätätilaan
+                    throw;
+                }
+            }
+
+            
             
             await Task.WhenAll(task1, task2, task3);
         }

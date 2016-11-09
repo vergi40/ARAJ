@@ -100,6 +100,7 @@
     </Compile>
     <Compile Include="AppLogic.cs" />
     <Compile Include="DeviceConstants.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="IUiDataSync.cs" />
     <Compile Include="MainLogic.cs" />
