@@ -102,8 +102,11 @@
     <Compile Include="DeviceConstants.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Implementation\EmergencyStopObserver.cs" />
+    <Compile Include="Implementation\RobotFunctionality.cs" />
+    <Compile Include="Implementation\SensorReader.cs" />
     <Compile Include="IUiDataSync.cs" />
-    <Compile Include="MainLogic.cs" />
+    <Compile Include="Implementation\MainLogic.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

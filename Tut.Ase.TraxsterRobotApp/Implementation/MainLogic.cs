@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Tut.Ase.TraxsterRobotApp
+namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
-    
     class MainLogic
     {
         public const int LOOP_WAIT_TIME = 50;
 
         private Robot _robot;
         private bool _emergencyStop;
+        private bool _runButtonPressed;
 
         private Enums.MainLogicStates _state;
 
@@ -21,17 +18,30 @@ namespace Tut.Ase.TraxsterRobotApp
         {
             _robot = robot;
             _emergencyStop = false;
+            _runButtonPressed = false;
 
             _state = Enums.MainLogicStates.Stopped;
 
         }
 
         /// <summary>
-        /// Initialize different threads
+        /// Starts the main logic
         /// </summary>
         /// <returns></returns>
         public async Task RunLogic()
         {
+            // Background loop, waits for user to press "Run" button
+            while(true)
+            {
+                if (_runButtonPressed)
+                {
+                    while (!_emergencyStop)
+                    {
+                        
+                    }
+                }
+            }
+
             bool notRunning = true;
             // Thread: Sensor observing for emergency stop
             var task1 = ObserveEmergencyStop();
@@ -58,6 +68,7 @@ namespace Tut.Ase.TraxsterRobotApp
 
                     notRunning = false;
                 }
+
                 
                 try
                 {
