@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tut.Ase.TraxsterRobotApp.Implementation;
 
 namespace Tut.Ase.TraxsterRobotApp
 {
@@ -13,7 +14,6 @@ namespace Tut.Ase.TraxsterRobotApp
     {
         private Robot robot;
         
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -30,6 +30,7 @@ namespace Tut.Ase.TraxsterRobotApp
         public async System.Threading.Tasks.Task run()
         {
             // TODO: Implement your app here!
+            await new MainLogic(robot).RunLogic();
         }
     }
 }
