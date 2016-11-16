@@ -14,7 +14,6 @@ namespace Tut.Ase.TraxsterRobotApp
     {
         private Robot robot;
         
-
         /// <summary>
         /// Constructor.
         /// </summary>

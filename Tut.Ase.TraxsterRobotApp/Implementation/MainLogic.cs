@@ -9,136 +9,86 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public const int LOOP_WAIT_TIME = 50;
 
         private Robot _robot;
-        private bool _emergencyStop;
-        private bool _runButtonPressed;
 
         private Enums.MainLogicStates _state;
 
         public MainLogic(Robot robot)
         {
             _robot = robot;
-            _emergencyStop = false;
-            _runButtonPressed = false;
-
             _state = Enums.MainLogicStates.Stopped;
 
         }
 
         /// <summary>
-        /// Starts the main logic
+        /// Starts and runs the main logic
         /// </summary>
         /// <returns></returns>
         public async Task RunLogic()
         {
-            // Background loop, waits for user to press "Run" button
-            while(true)
-            {
-                if (_runButtonPressed)
-                {
-                    while (!_emergencyStop)
-                    {
-                        
-                    }
-                }
-            }
+            // Initialize concurrent objects
+            RobotFunctionality robotFunctions = new RobotFunctionality(_robot);
+            SensorReader sensorReader = new SensorReader(_robot);
+            EmergencyStopObserver observer = new EmergencyStopObserver(_robot);
 
-            bool notRunning = true;
-            // Thread: Sensor observing for emergency stop
-            var task1 = ObserveEmergencyStop();
+            Task task1 = robotFunctions.Logic();
+            Task task2 = sensorReader.Logic();
+            Task task3 = observer.Logic();
 
-            // Thread: Sensor reading
-            var task2 = ReadSensors();
-
-            // Thread: Controlling the robot
-            var task3 = RunRobot();
-
+            // Background loop for everything, always running
             while (true)
             {
-                // Jos logiikka ei vielä käynnissä
-                if (notRunning)
-                {
-                    // Thread: Sensor observing for emergency stop
-                    task1.Initialize();
-
-                    // Thread: Sensor reading
-                    task2.Initialize();
-
-                    // Thread: Controlling the robot
-                    task3.Initialize();
-
-                    notRunning = false;
-                }
-
-                
                 try
                 {
-                    // Tee jotain staten mukaan
+                    await Task.Delay(LOOP_WAIT_TIME);
 
-                    // Run
+                    // Waits for user to press "Run" button
+                    if (_state == Enums.MainLogicStates.Stopped)
+                    {
+                        // Start-button pressed
+                        if (_robot.readPin(DeviceConstants.BUTTON1_PIN))
+                        {
+                            _state = Enums.MainLogicStates.Run;
 
-                    // Stopped
+                            // Start up the threads etc
+                            robotFunctions.Run();
+                            sensorReader.Run();
+                            observer.Run();
 
-                    // Emergency
+                            continue;
+                        }
 
+                    }
+                    if (_state == Enums.MainLogicStates.Run)
+                    {
+                        // Stop-button pressed
+                        if (_robot.readPin(DeviceConstants.BUTTON1_PIN))
+                        {
+                            _state = Enums.MainLogicStates.Stopped;
 
+                            // Shut down / reset the threads
 
-
-
+                            continue;
+                        }
+                    }
+                    if (_state == Enums.MainLogicStates.Emergency)
+                    {
+                        //TODO
+                    }
                 }
+
+                    // All exception handling / state changing here
                 catch (EmergencyStopException)
                 {
-                    // lopeta runmode
-                    task1.Stop();
-
-                    // Mene hätätilaan
-                    throw;
+                    _state = Enums.MainLogicStates.Emergency;
                 }
-            }
-
-            
-            
-            await Task.WhenAll(task1, task2, task3);
-        }
-
-        private async Task ObserveEmergencyStop()
-        {
-            while (true)
-            {
-                return;
-            }
-        }
-
-        private async Task ReadSensors()
-        {
-            while (true)
-            {
-                return;
-            }
-        }
-
-        private async Task RunRobot()
-        {
-            try
-            {
-                while (true)
+                catch (Exception e)
                 {
-                    // Test
-                    Debug.WriteLine("#DEBUG Button 1 state: " + _robot.readPin(DeviceConstants.BUTTON1_PIN));
-                    await Task.Delay(LOOP_WAIT_TIME);
+                    //
                 }
             }
-            catch (EmergencyStopException)
-            {
-                _emergencyStop = true;
-                return;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                _emergencyStop = true;
-                return;
-            }
-            
+
+            await Task.WhenAll(task1, task2, task3);
+
         }
     }
 }
