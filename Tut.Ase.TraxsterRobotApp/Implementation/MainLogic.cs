@@ -30,9 +30,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             SensorReader sensorReader = new SensorReader(_robot);
             EmergencyStopObserver observer = new EmergencyStopObserver(_robot);
 
-            Task task1 = movementFunctions.Logic();
-            Task task2 = sensorReader.Logic();
-            Task task3 = observer.Logic();
+            Task.Run(() => movementFunctions.Logic());
+            Task.Run(() => sensorReader.Logic());
+            Task.Run(() => observer.Logic());
 
             // Background loop for everything, always running
             while (true)
@@ -87,12 +87,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     //
                 }
             }
-
             //await Task.WhenAll(task1, task2, task3);
-            await task1;
-            await task2;
-            await task3;
-
         }
     }
 }
