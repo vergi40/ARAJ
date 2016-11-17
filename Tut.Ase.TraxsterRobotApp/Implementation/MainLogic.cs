@@ -66,6 +66,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             _state = Enums.MainLogicStates.Stopped;
 
                             // Shut down / reset the threads
+                            movementFunctions.Stop();
+                            sensorReader.Stop();
+                            observer.Stop();
 
                             continue;
                         }

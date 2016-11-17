@@ -22,6 +22,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         {
             while (true)
             {
+                await Task.Delay(LOOP_WAIT_TIME);
+
                 //
                 if (_stopped)
                 {
@@ -32,7 +34,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     // Run logic
                 }
 
-                await Task.Delay(LOOP_WAIT_TIME);
 
             }
 
