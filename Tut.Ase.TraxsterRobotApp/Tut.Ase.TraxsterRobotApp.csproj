@@ -103,7 +103,7 @@
     <Compile Include="Enums.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Implementation\EmergencyStopObserver.cs" />
-    <Compile Include="Implementation\RobotFunctionality.cs" />
+    <Compile Include="Implementation\MovementFunctionality.cs" />
     <Compile Include="Implementation\SensorReader.cs" />
     <Compile Include="IUiDataSync.cs" />
     <Compile Include="Implementation\MainLogic.cs" />
