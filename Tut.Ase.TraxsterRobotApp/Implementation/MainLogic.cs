@@ -26,13 +26,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public async Task RunLogic()
         {
             // Initialize concurrent objects
-            RobotFunctionality robotFunctions = new RobotFunctionality(_robot);
+            MovementFunctionality movementFunctions = new MovementFunctionality(_robot);
             SensorReader sensorReader = new SensorReader(_robot);
             EmergencyStopObserver observer = new EmergencyStopObserver(_robot);
 
-            Task task1 = robotFunctions.Logic();
-            Task task2 = sensorReader.Logic();
-            Task task3 = observer.Logic();
+            Task.Run(() => movementFunctions.Logic());
+            Task.Run(() => sensorReader.Logic());
+            Task.Run(() => observer.Logic());
 
             // Background loop for everything, always running
             while (true)
@@ -50,10 +50,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             _state = Enums.MainLogicStates.Run;
 
                             // Start up the threads etc
-                            robotFunctions.Run();
+                            movementFunctions.Run();
                             sensorReader.Run();
                             observer.Run();
-
+                            
                             continue;
                         }
 
@@ -73,6 +73,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     if (_state == Enums.MainLogicStates.Emergency)
                     {
                         //TODO
+                        break;
                     }
                 }
 
@@ -86,9 +87,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     //
                 }
             }
-
-            await Task.WhenAll(task1, task2, task3);
-
+            //await Task.WhenAll(task1, task2, task3);
         }
     }
 }
