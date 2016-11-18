@@ -31,67 +31,63 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Left:" />
         <ComboBox Grid.Row="2" Grid.Column="0" x:Name="LeftSensorComboBox" SelectedValuePath="Content" SelectedValue="{Binding LeftSensorValue, Mode=TwoWay}">
             <ComboBoxItem Tag="80" IsSelected="True">80</ComboBoxItem>
-            <ComboBoxItem Tag="55">55</ComboBoxItem>
-            <ComboBoxItem Tag="38">38</ComboBoxItem>
-            <ComboBoxItem Tag="28">28</ComboBoxItem>
-            <ComboBoxItem Tag="21">21</ComboBoxItem>
-            <ComboBoxItem Tag="17">17</ComboBoxItem>
-            <ComboBoxItem Tag="14">14</ComboBoxItem>
-            <ComboBoxItem Tag="12">12</ComboBoxItem>
-            <ComboBoxItem Tag="11">11</ComboBoxItem>
+            <ComboBoxItem Tag="70">70</ComboBoxItem>
+            <ComboBoxItem Tag="60">60</ComboBoxItem>
+            <ComboBoxItem Tag="50">50</ComboBoxItem>
+            <ComboBoxItem Tag="40">40</ComboBoxItem>
+            <ComboBoxItem Tag="30">30</ComboBoxItem>
+            <ComboBoxItem Tag="20">20</ComboBoxItem>
+            <ComboBoxItem Tag="15">15</ComboBoxItem>
             <ComboBoxItem Tag="10">10</ComboBoxItem>
         </ComboBox>
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Motor:" />
         <TextBox Grid.Row="5" Grid.Column="0" x:Name="LeftMotorTextBox" IsReadOnly="True" Text="{Binding LeftMotorSpeed}" />
-        <CheckBox Grid.Row="7" Grid.Column="0" Content="Button 1" x:Name="Button1CheckBox" IsChecked="{Binding Button1Pressed, Mode = TwoWay}" />
-        <TextBlock Grid.Row="8" Grid.Column="0" x:Name="Led1TextBlock" Text="{Binding Led1Text}" />
+        <TextBlock Grid.Row="8" Grid.Column="0" x:Name="LeftLedTextBlock" Text="{Binding LeftLedText}" />
 
         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="ModeTextBlock" Text="{Binding ModeText}" />
         <TextBlock Grid.Row="1" Grid.Column="1" Text="Front:" />
         <ComboBox Grid.Row="2" Grid.Column="1" x:Name="FrontSensorComboBox" SelectedValuePath="Content" SelectedValue="{Binding FrontSensorValue, Mode=TwoWay}">
             <ComboBoxItem Tag="80" IsSelected="True">80</ComboBoxItem>
-            <ComboBoxItem Tag="55">55</ComboBoxItem>
-            <ComboBoxItem Tag="38">38</ComboBoxItem>
-            <ComboBoxItem Tag="28">28</ComboBoxItem>
-            <ComboBoxItem Tag="21">21</ComboBoxItem>
-            <ComboBoxItem Tag="17">17</ComboBoxItem>
-            <ComboBoxItem Tag="14">14</ComboBoxItem>
-            <ComboBoxItem Tag="12">12</ComboBoxItem>
-            <ComboBoxItem Tag="11">11</ComboBoxItem>
+            <ComboBoxItem Tag="70">70</ComboBoxItem>
+            <ComboBoxItem Tag="60">60</ComboBoxItem>
+            <ComboBoxItem Tag="50">50</ComboBoxItem>
+            <ComboBoxItem Tag="40">40</ComboBoxItem>
+            <ComboBoxItem Tag="30">30</ComboBoxItem>
+            <ComboBoxItem Tag="20">20</ComboBoxItem>
+            <ComboBoxItem Tag="15">15</ComboBoxItem>
             <ComboBoxItem Tag="10">10</ComboBoxItem>
         </ComboBox>
         <TextBlock Grid.Row="5" Grid.Column="1" Text="Rear:" />
         <ComboBox Grid.Row="6" Grid.Column="1" x:Name="RearSensorComboBox" SelectedValuePath="Content" SelectedValue="{Binding RearSensorValue, Mode=TwoWay}">
             <ComboBoxItem Tag="80" IsSelected="True">80</ComboBoxItem>
-            <ComboBoxItem Tag="55">55</ComboBoxItem>
-            <ComboBoxItem Tag="38">38</ComboBoxItem>
-            <ComboBoxItem Tag="28">28</ComboBoxItem>
-            <ComboBoxItem Tag="21">21</ComboBoxItem>
-            <ComboBoxItem Tag="17">17</ComboBoxItem>
-            <ComboBoxItem Tag="14">14</ComboBoxItem>
-            <ComboBoxItem Tag="12">12</ComboBoxItem>
-            <ComboBoxItem Tag="11">11</ComboBoxItem>
+            <ComboBoxItem Tag="70">70</ComboBoxItem>
+            <ComboBoxItem Tag="60">60</ComboBoxItem>
+            <ComboBoxItem Tag="50">50</ComboBoxItem>
+            <ComboBoxItem Tag="40">40</ComboBoxItem>
+            <ComboBoxItem Tag="30">30</ComboBoxItem>
+            <ComboBoxItem Tag="20">20</ComboBoxItem>
+            <ComboBoxItem Tag="15">15</ComboBoxItem>
             <ComboBoxItem Tag="10">10</ComboBoxItem>
         </ComboBox>
-        <TextBlock Grid.Row="8" Grid.Column="1" x:Name="BuzzerTextBlock" Text="{Binding BuzzerText}" />
+        <CheckBox Grid.Row="7" Grid.Column="1" Content="Middle button" x:Name="MiddleButtonCheckBox" IsChecked="{Binding MiddleButtonPressed, Mode = TwoWay}" />
+        <!--<TextBlock Grid.Row="8" Grid.Column="1" x:Name="BuzzerTextBlock" Text="{Binding BuzzerText}" />-->
         
         <TextBlock Grid.Row="1" Grid.Column="2" Text="Right:" />
         <ComboBox Grid.Row="2" Grid.Column="2" x:Name="RightSensorComboBox" SelectedValuePath="Content" SelectedValue="{Binding RightSensorValue, Mode=TwoWay}">
             <ComboBoxItem Tag="80" IsSelected="True">80</ComboBoxItem>
-            <ComboBoxItem Tag="55">55</ComboBoxItem>
-            <ComboBoxItem Tag="38">38</ComboBoxItem>
-            <ComboBoxItem Tag="28">28</ComboBoxItem>
-            <ComboBoxItem Tag="21">21</ComboBoxItem>
-            <ComboBoxItem Tag="17">17</ComboBoxItem>
-            <ComboBoxItem Tag="14">14</ComboBoxItem>
-            <ComboBoxItem Tag="12">12</ComboBoxItem>
-            <ComboBoxItem Tag="11">11</ComboBoxItem>
+            <ComboBoxItem Tag="70">70</ComboBoxItem>
+            <ComboBoxItem Tag="60">60</ComboBoxItem>
+            <ComboBoxItem Tag="50">50</ComboBoxItem>
+            <ComboBoxItem Tag="40">40</ComboBoxItem>
+            <ComboBoxItem Tag="30">30</ComboBoxItem>
+            <ComboBoxItem Tag="20">20</ComboBoxItem>
+            <ComboBoxItem Tag="15">15</ComboBoxItem>
             <ComboBoxItem Tag="10">10</ComboBoxItem>
         </ComboBox>
         <TextBlock Grid.Row="4" Grid.Column="2" Text="Motor:" />
         <TextBox Grid.Row="5" Grid.Column="2" x:Name="RightMotorTextBox" IsReadOnly="True" Text="{Binding RightMotorSpeed}" />
-        <CheckBox Grid.Row="7" Grid.Column="2" Content="Button 2" x:Name="Button2CheckBox" IsChecked="{Binding Button2Pressed, Mode = TwoWay}" />
-        <TextBlock Grid.Row="8" Grid.Column="2" x:Name="Led2TextBlock" Text="{Binding Led2Text}" />
+        <CheckBox Grid.Row="7" Grid.Column="2" Content="Right Button" x:Name="RightButtonCheckBox" IsChecked="{Binding RightButtonPressed, Mode = TwoWay}" />
+        <TextBlock Grid.Row="8" Grid.Column="2" x:Name="RightLedTextBlock" Text="{Binding RightLedText}" />
         
     </Grid>
 </Page>

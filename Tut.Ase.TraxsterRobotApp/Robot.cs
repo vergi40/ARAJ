@@ -2,21 +2,30 @@
 // Tampere University of Technology
 // Department of Automation Science and Engineering
 // File created: 10/2016
-// Last modified: 10/2016
+// Last modified: 11/2016
 
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Tut.Ase.TraxsterRobotApp
 {
     /// <summary>
-    /// Provides access to the physical devices of the robot.
+    /// Provides access to the physical devices of the robot. This class is thread-safe: it is guaranteed that any 
+    /// concurrent method calls do not mess things up.
     /// </summary>
-    public class Robot : IDisposable
+    public sealed class Robot : IDisposable
     {
         private readonly IUiDataSync uiDataSync;
         private readonly bool runOnSimulator;
-        
-        
+
+        private MotorController motorController = null;
+        private SensorController sensorController = null;
+        private GertbotUartController gertController = null;
+        private GertbotGeneral gertbotGeneral = null;
+        private GpioController gpioController = null;
+
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -30,6 +39,16 @@ namespace Tut.Ase.TraxsterRobotApp
             this.runOnSimulator = (analyticsInfo.DeviceFamily.Trim().ToLower() == "windows.desktop");
 
             uiSync.setSimulatorMode(this.runOnSimulator);
+
+            // Initialize hardware related objects if not run on simulator
+            if (!this.runOnSimulator)
+            {
+                this.gertController = new GertbotUartController();
+                this.sensorController = new SensorController(this.gertController);
+                this.motorController = new MotorController(this.gertController);
+                this.gertbotGeneral = new GertbotGeneral(this.gertController);
+                this.gpioController = new GpioController(this.gertController, this.motorController);
+            }
         }
         
         /// <summary>
@@ -37,7 +56,15 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public void Dispose()
         {
-            // TODO: impl dispose (probably required at least for serial port classes)
+            if (this.gertController != null)
+            {
+                try
+                {
+                    this.gertController.Dispose();
+                    this.gertController = null;
+                }
+                catch { }
+            }
         }
 
         /// <summary>
@@ -45,7 +72,7 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         /// <param name="id">Pin ID.</param>
         /// <returns>Sensor value.</returns>
-        public double getSensorValue(int id)
+        public async Task<int> getSensorValue(int id)
         {
             if (this.runOnSimulator)
             {
@@ -53,17 +80,16 @@ namespace Tut.Ase.TraxsterRobotApp
             }
             else
             {
-                // TODO: Get from physical device
-                throw new NotImplementedException();
+                return await this.sensorController.getSensorValue(id);
             }
         }
 
         /// <summary>
-        /// Sets motor speeds.
+        /// Sets motor speeds (-100..100).
         /// </summary>
         /// <param name="leftMotorSpeed">Left motor speed.</param>
         /// <param name="rightMotorSpeed">Right motor speed.</param>
-        public void setMotorSpeed(int leftMotorSpeed, int rightMotorSpeed)
+        public async Task setMotorSpeed(int leftMotorSpeed, int rightMotorSpeed)
         {
             if (this.runOnSimulator)
             {
@@ -71,44 +97,71 @@ namespace Tut.Ase.TraxsterRobotApp
             }
             else
             {
-                // TODO: Get from physical device
-                throw new NotImplementedException();
+                await this.motorController.setMotorSpeed(leftMotorSpeed, rightMotorSpeed);
+            }
+        }
+        
+        /// <summary>
+        /// Reads the states of pins.
+        /// </summary>
+        /// <returns>Pin states ordered after pin ID.</returns>
+        public async Task<bool[]> readPins()
+        {
+            if (this.runOnSimulator)
+            {
+                return this.uiDataSync.readPins();
+            }
+            else
+            {
+                return await this.gpioController.readPins();
             }
         }
 
         /// <summary>
-        /// Reads the state of a pin.
+        /// Writes the states of pins.
         /// </summary>
-        /// <param name="id">Pin ID.</param>
-        /// <returns>Pin state.</returns>
-        public bool readPin(int id)
+        /// <param name="states">Pin states. Array length must be 8!</param>
+        public async Task writePins(bool[] states)
         {
             if (this.runOnSimulator)
             {
-                return this.uiDataSync.readPin(id);
+                this.uiDataSync.writePins(states);
             }
             else
             {
-                // TODO: Get from physical device
-                throw new NotImplementedException();
+                await this.gpioController.writePins(states);
             }
         }
 
         /// <summary>
-        /// Writes the state of a pin.
+        /// Use this method to test whether communication with the add-on card works.
         /// </summary>
-        /// <param name="id">Pin ID.</param>
-        /// <param name="state">Pin state.</param>
-        public void writePin(int id, bool state)
+        /// <returns>Some information retrieved from the add-on card.</returns>
+        public async Task<string> testAddOnCardCommunication()
         {
             if (this.runOnSimulator)
             {
-                this.uiDataSync.writePin(id, state);
+                throw new InvalidOperationException();
             }
             else
             {
-                // TODO: Get from physical device
-                throw new NotImplementedException();
+                return await this.gertbotGeneral.getVersion();
+            }
+        }
+
+        /// <summary>
+        /// Gets error status information.
+        /// </summary>
+        /// <returns>Error status.</returns>
+        public async Task<string> readAddOnCardErrorStatus()
+        {
+            if (this.runOnSimulator)
+            {
+                throw new InvalidOperationException();
+            }
+            else
+            {
+                return await this.gertbotGeneral.readErrorStatus();
             }
         }
     }

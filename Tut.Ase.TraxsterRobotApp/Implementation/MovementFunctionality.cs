@@ -19,7 +19,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             _stopped = true;
         }
 
-        public async Task Logic()
+        public async Task StartLogic()
         {
             while (true)
             {

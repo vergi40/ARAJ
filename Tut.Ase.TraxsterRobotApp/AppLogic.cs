@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Petri Kannisto
+// Tampere University of Technology
+// Department of Automation Science and Engineering
+// File created: 11/2016
+// Last modified: 11/2016
+
+using System;
 using Tut.Ase.TraxsterRobotApp.Implementation;
 
 namespace Tut.Ase.TraxsterRobotApp
@@ -14,6 +16,7 @@ namespace Tut.Ase.TraxsterRobotApp
     {
         private Robot robot;
         
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -29,8 +32,7 @@ namespace Tut.Ase.TraxsterRobotApp
         /// <returns>Task.</returns>
         public async System.Threading.Tasks.Task run()
         {
-            // TODO: Implement your app here!
-            await new MainLogic(robot).RunLogic();
+            await new MainLogic(robot).StartLogic();
         }
     }
 }

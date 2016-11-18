@@ -2,9 +2,10 @@
 // Tampere University of Technology
 // Department of Automation Science and Engineering
 // File created: 10/2016
-// Last modified: 10/2016
+// Last modified: 11/2016
 
 using System;
+using System.Collections.Generic;
 
 namespace Tut.Ase.TraxsterRobotApp
 {
@@ -25,21 +26,19 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         /// <param name="id">Sensor ID.</param>
         /// <returns>Sensor value.</returns>
-        double getSensorValue(int id);
+        int getSensorValue(int id);
 
         /// <summary>
-        /// Reads a pin state.
+        /// Reads pin states.
         /// </summary>
-        /// <param name="id">Pin ID.</param>
-        /// <returns>State.</returns>
-        bool readPin(int id);
+        /// <returns>Pin states ordered after pin ID.</returns>
+        bool[] readPins();
 
         /// <summary>
-        /// Writes a pin state.
+        /// Writes the states of pins.
         /// </summary>
-        /// <param name="id">Pin ID.</param>
-        /// <param name="state">State.</param>
-        void writePin(int id, bool state);
+        /// <param name="states">Pin states. Array length must be 8!</param>
+        void writePins(bool[] states);
 
         /// <summary>
         /// Sets simulator mode.

@@ -23,16 +23,16 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// Starts and runs the main logic
         /// </summary>
         /// <returns></returns>
-        public async Task RunLogic()
+        public async Task StartLogic()
         {
             // Initialize concurrent objects
             MovementFunctionality movementFunctions = new MovementFunctionality(_robot);
             SensorReader sensorReader = new SensorReader(_robot);
             EmergencyStopObserver observer = new EmergencyStopObserver(_robot);
 
-            Task.Run(() => movementFunctions.Logic());
-            Task.Run(() => sensorReader.Logic());
-            Task.Run(() => observer.Logic());
+            Task.Run(() => movementFunctions.StartLogic());
+            Task.Run(() => sensorReader.StartLogic());
+            Task.Run(() => observer.StartLogic());
 
             // Background loop for everything, always running
             while (true)

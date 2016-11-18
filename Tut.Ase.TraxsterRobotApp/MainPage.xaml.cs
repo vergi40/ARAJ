@@ -2,7 +2,7 @@
 // Tampere University of Technology
 // Department of Automation Science and Engineering
 // File created: 10/2016
-// Last modified: 10/2016
+// Last modified: 11/2016
 
 using System;
 using System.Collections.Generic;
@@ -28,20 +28,26 @@ namespace Tut.Ase.TraxsterRobotApp
     /// </summary>
     public sealed partial class MainPage : Page, System.ComponentModel.INotifyPropertyChanged, IUiDataSync
     {
+        // This is used to mutually exclude any threads calling this class. It is also supposed to force 
+        // the environment not to cache locked variables as they are utilised from various threads.
         private object lockObject = new object();
         
         private string leftMotorSpeed = "0";
         private string rightMotorSpeed = "0";
         private string modeText = "...";
-        private bool button1Pressed = false;
-        private bool button2Pressed = false;
-        private string buzzerText = "Buzzer OFF";
-        private string led1Text = "LED 1 OFF";
-        private string led2Text = "LED 2 OFF";
+        private bool middleButtonPressed = false;
+        private bool rightButtonPressed = false;
+        //private string buzzerText = "Buzzer OFF";
+        private string leftLedText = "Left LED OFF";
+        private string rightLedText = "Right LED OFF";
         private int leftSensorValue = 80;
         private int frontSensorValue = 80;
         private int rightSensorValue = 80;
         private int rearSensorValue = 80;
+
+        // Exceptions are thrown randomly as device is being controlled. This simulates
+        // situations where device-related exceptions occur.
+        private int requestCounter = 0;
 
 
         /// <summary>
@@ -58,7 +64,7 @@ namespace Tut.Ase.TraxsterRobotApp
             System.Threading.Tasks.Task.Run(() => runRobotApp());
         }
 
-        private async void runRobotApp()
+        private async System.Threading.Tasks.Task runRobotApp()
         {
             using (var robot = new Robot(this))
             {
@@ -67,98 +73,118 @@ namespace Tut.Ase.TraxsterRobotApp
         }
 
 
-        #region IUiDataSync
+        #region IUiDataSync AND RELATED
 
-        double IUiDataSync.getSensorValue(int id)
+        int IUiDataSync.getSensorValue(int id)
         {
-            lock (this.lockObject)
+            throwHardwareExceptionIfAppropriate();
+
+            switch (id)
             {
-                switch (id)
-                {
-                    case DeviceConstants.LEFT_SENSOR_ID:
-                        return convertSensorValueToRaw(this.leftSensorValue);
+                case DeviceConstants.LEFT_SENSOR_ID:
+                    return convertSensorValueToRaw(this.leftSensorValue);
 
-                    case DeviceConstants.FRONT_SENSOR_ID:
-                        return convertSensorValueToRaw(this.frontSensorValue);
+                case DeviceConstants.FRONT_SENSOR_ID:
+                    return convertSensorValueToRaw(this.frontSensorValue);
 
-                    case DeviceConstants.RIGHT_SENSOR_ID:
-                        return convertSensorValueToRaw(this.rightSensorValue);
+                case DeviceConstants.RIGHT_SENSOR_ID:
+                    return convertSensorValueToRaw(this.rightSensorValue);
 
-                    case DeviceConstants.REAR_SENSOR_ID:
-                        return convertSensorValueToRaw(this.rearSensorValue);
+                case DeviceConstants.REAR_SENSOR_ID:
+                    return convertSensorValueToRaw(this.rearSensorValue);
 
-                    default:
-                        throw new ArgumentException("Unknown sensor " + id);
-                }
+                default:
+                    throw new ArgumentException("Unknown sensor " + id);
             }
         }
 
-        private double convertSensorValueToRaw(int value)
+        private int convertSensorValueToRaw(int value)
         {
-            return 32 * value - 1403;
+            // This formula was used as an example before the actual formula was resolved
+            //return 32 * value - 1403;
+
+            // This is to simulate a sensor seeing "nothing" and giving a very low output
+            if (value >= 79)
+            {
+                return 30;
+            }
+
+            // To avoid division by zero (not expected though)
+            if (value == 0)
+            {
+                value = 1;
+            }
+
+            return (int)((double)31000 / value + 100);
         }
 
-        bool IUiDataSync.readPin(int id)
+        bool[] IUiDataSync.readPins()
         {
-            lock (this.lockObject)
+            throwHardwareExceptionIfAppropriate();
+
+            // In hardware, buttons return true if *not* pressed.
+            // Note that the state of non-plugged pins is whatever in hardware.
+            bool[] returnValue = new bool[]
             {
-                switch (id)
-                {
-                    // TODO: Invert bool values according to pin setup
+                false, false, false, false,
+                false, false, false, false // 8 items in total
+            };
 
-                    case DeviceConstants.BUTTON1_PIN:
-                        return this.Button1Pressed.HasValue && this.Button1Pressed.Value;
-                      
-                    case DeviceConstants.BUTTON2_PIN:
-                        return this.Button2Pressed.HasValue && this.Button2Pressed.Value;
-
-                    default:
-                        throw new ArgumentException("Unknown input pin " + id);
-                }
-            }
+            returnValue[DeviceConstants.BUTTON_MIDDLE_PIN] = !this.MiddleButtonPressed.HasValue || !this.MiddleButtonPressed.Value;
+            returnValue[DeviceConstants.BUTTON_RIGHT_PIN] = !this.RightButtonPressed.HasValue || !this.RightButtonPressed.Value;
+            
+            return returnValue;
         }
 
-        void IUiDataSync.writePin(int id, bool state)
+        void IUiDataSync.writePins(bool[] states)
         {
-            // TODO: invert value if required due to pin setup
-            string onOff = state ? "ON" : "OFF";
+            const int ARRAY_LENGTH = 8;
 
-            lock (this.lockObject)
+            if (states.Length != ARRAY_LENGTH)
             {
-                switch (id)
-                {
-                    case DeviceConstants.BUZZER_PIN:
-                        this.BuzzerText = "Buzzer " + onOff;
-                        break;
-
-                    case DeviceConstants.LED1_PIN:
-                        this.Led1Text = "LED 1 " + onOff;
-                        break;
-
-                    case DeviceConstants.LED2_PIN:
-                        this.Led2Text = "LED 2 " + onOff;
-                        break;
-
-                    default:
-                        throw new ArgumentException("Unknown output pin " + id);
-                }
+                throw new ArgumentException("When writing pins, array length must be " + ARRAY_LENGTH);
             }
+
+            throwHardwareExceptionIfAppropriate();
+
+            string onOffLeft = states[DeviceConstants.LED_LEFT_PIN] ? "ON" : "OFF";
+            string onOffRight = states[DeviceConstants.LED_RIGHT_PIN] ? "ON" : "OFF";
+
+            this.LeftLedText = "Left LED " + onOffLeft;
+            this.RightLedText = "Right LED " + onOffRight;
         }
 
         void IUiDataSync.setMotorSpeed(int left, int right)
         {
-            lock (this.lockObject)
-            {
-                this.LeftMotorSpeed = left.ToString();
-                this.RightMotorSpeed = right.ToString();
-            }
+            throwHardwareExceptionIfAppropriate();
+
+            // Restricting speeds
+            if (left > 100) left = 100;
+            if (left < -100) left = -100;
+            if (right > 100) right = 100;
+            if (right < -100) right = -100;
+
+            this.LeftMotorSpeed = left.ToString();
+            this.RightMotorSpeed = right.ToString();
         }
         
         void IUiDataSync.setSimulatorMode(bool enabled)
         {
+            this.ModeText = enabled ? "Mode: simulator" : "Mode: device";
+        }
+
+        private void throwHardwareExceptionIfAppropriate()
+        {
             lock (this.lockObject)
             {
-                this.ModeText = enabled ? "Mode: simulator" : "Mode: device";
+                // Throwing an exception every 10th time to simulate hardware problems
+                ++this.requestCounter;
+                this.requestCounter = this.requestCounter % 10;
+                
+                if (this.requestCounter == 0)
+                {
+                    throw new Exception("Simulating hardware related errors");
+                }
             }
         }
 
@@ -181,10 +207,19 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string LeftMotorSpeed
         {
-            get { return this.leftMotorSpeed; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.leftMotorSpeed;
+                }
+            }
             set
             {
-                this.leftMotorSpeed = value;
+                lock (this.lockObject)
+                {
+                    this.leftMotorSpeed = value;
+                }
                 OnPropertyChanged("LeftMotorSpeed");
             }
         }
@@ -194,10 +229,19 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string RightMotorSpeed
         {
-            get { return this.rightMotorSpeed; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.rightMotorSpeed;
+                }
+            }
             set
             {
-                this.rightMotorSpeed = value;
+                lock (this.lockObject)
+                {
+                    this.rightMotorSpeed = value;
+                }
                 OnPropertyChanged("RightMotorSpeed");
             }
         }
@@ -207,10 +251,19 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string ModeText
         {
-            get { return this.modeText; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.modeText;
+                }
+            }
             set
             {
-                this.modeText = value;
+                lock (this.lockObject)
+                {
+                    this.modeText = value;
+                }
                 OnPropertyChanged("ModeText");
             }
         }
@@ -218,76 +271,131 @@ namespace Tut.Ase.TraxsterRobotApp
         /// <summary>
         /// Whether button 1 is being pressed.
         /// </summary>
-        public bool? Button1Pressed
+        public bool? MiddleButtonPressed
         {
-            get { return this.button1Pressed; }
-            set {
-                this.button1Pressed = value.HasValue && value.Value;
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.middleButtonPressed;
+                }
+            }
+            set
+            {
+                lock (this.lockObject)
+                {
+                    this.middleButtonPressed = value.HasValue && value.Value;
+                }
             }
         }
 
         /// <summary>
         /// Whether button 2 is being pressed.
         /// </summary>
-        public bool? Button2Pressed
+        public bool? RightButtonPressed
         {
-            get { return this.button2Pressed; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.rightButtonPressed;
+                }
+            }
             set
             {
-                this.button2Pressed = value.HasValue && value.Value;
+                lock (this.lockObject)
+                {
+                    this.rightButtonPressed = value.HasValue && value.Value;
+                }
             }
         }
 
         /// <summary>
         /// Text that indicates led 1 status.
         /// </summary>
-        public string Led1Text
+        public string LeftLedText
         {
-            get { return this.led1Text; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.leftLedText;
+                }
+            }
             set
             {
-                this.led1Text = value;
-                OnPropertyChanged("Led1Text");
+                lock (this.lockObject)
+                {
+                    this.leftLedText = value;
+                }
+                OnPropertyChanged("LeftLedText");
             }
         }
 
         /// <summary>
         /// Text that indicates led 2 status.
         /// </summary>
-        public string Led2Text
+        public string RightLedText
         {
-            get { return this.led2Text; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.rightLedText;
+                }
+            }
             set
             {
-                this.led2Text = value;
-                OnPropertyChanged("Led2Text");
+                lock (this.lockObject)
+                {
+                    this.rightLedText = value;
+                }
+                OnPropertyChanged("RightLedText");
             }
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Text that indicates buzzer status.
         /// </summary>
         public string BuzzerText
         {
-            get { return this.buzzerText; }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.buzzerText;
+                }
+            }
             set
             {
-                this.buzzerText = value;
+                lock (this.lockObject)
+                {
+                    this.buzzerText = value;
+                }
                 OnPropertyChanged("BuzzerText");
             }
-        }
+        }*/
 
         /// <summary>
         /// Left sensor value.
         /// </summary>
         public string LeftSensorValue
         {
-            get { return this.leftSensorValue.ToString(); }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.leftSensorValue.ToString();
+                }
+            }
             set
             {
                 try
                 {
-                    this.leftSensorValue = int.Parse(value);
+                    lock (this.lockObject)
+                    {
+                        this.leftSensorValue = int.Parse(value);
+                    }
                 }
                 catch { }
             }
@@ -298,12 +406,21 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string FrontSensorValue
         {
-            get { return this.frontSensorValue.ToString(); }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.frontSensorValue.ToString();
+                }
+            }
             set
             {
                 try
                 {
-                    this.frontSensorValue = int.Parse(value);
+                    lock (this.lockObject)
+                    {
+                        this.frontSensorValue = int.Parse(value);
+                    }
                 }
                 catch { }
             }
@@ -314,12 +431,21 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string RightSensorValue
         {
-            get { return this.rightSensorValue.ToString(); }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.rightSensorValue.ToString();
+                }
+            }
             set
             {
                 try
                 {
-                    this.rightSensorValue = int.Parse(value);
+                    lock (this.lockObject)
+                    {
+                        this.rightSensorValue = int.Parse(value);
+                    }
                 }
                 catch { }
             }
@@ -330,12 +456,21 @@ namespace Tut.Ase.TraxsterRobotApp
         /// </summary>
         public string RearSensorValue
         {
-            get { return this.rearSensorValue.ToString(); }
+            get
+            {
+                lock (this.lockObject)
+                {
+                    return this.rearSensorValue.ToString();
+                }
+            }
             set
             {
                 try
                 {
-                    this.rearSensorValue = int.Parse(value);
+                    lock (this.lockObject)
+                    {
+                        this.rearSensorValue = int.Parse(value);
+                    }
                 }
                 catch { }
             }
