@@ -10,12 +10,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     {
         public const int LOOP_WAIT_TIME = 50;
 
-        private Robot _robot;
         private bool _stopped;
-        public SensorReader(Robot robot)
+        private MutualData _mutualData;
+
+        public SensorReader(MutualData mutualData)
         {
-            _robot = robot;
             _stopped = true;
+            _mutualData = mutualData;
         }
 
         public async Task StartLogic()
@@ -31,12 +32,16 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
                 else
                 {
-                    // Run logic
+                    // Acquire raw data
+                    Dictionary<Enums.Sensor, int> rawSensorValues = await _mutualData.ReadRawData();
+
+                    // Filter raw data
+                    // TODO
+
+                    // Save filtered data back to mutual data
+                    // TODO
                 }
-
-
             }
-
         }
 
         public void Run()
