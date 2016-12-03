@@ -8,7 +8,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class EmergencyStopObserver
     {
-        public const int LOOP_WAIT_TIME = 50;
+        public const int LOOP_WAIT_TIME = 500;
 
         private Robot _robot;
         private bool _stopped;
@@ -18,10 +18,12 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             _stopped = true;
         }
 
-        public async Task Logic()
+        public async Task StartLogic()
         {
             while (true)
             {
+                await Task.Delay(LOOP_WAIT_TIME);
+
                 //
                 if (_stopped)
                 {
@@ -32,7 +34,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     // Run logic
                 }
 
-                await Task.Delay(LOOP_WAIT_TIME);
 
             }
 

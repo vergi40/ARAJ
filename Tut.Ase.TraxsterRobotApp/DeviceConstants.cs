@@ -2,9 +2,7 @@
 // Tampere University of Technology
 // Department of Automation Science and Engineering
 // File created: 10/2016
-// Last modified: 10/2016
-
-using System;
+// Last modified: 11/2016
 
 namespace Tut.Ase.TraxsterRobotApp
 {
@@ -13,16 +11,16 @@ namespace Tut.Ase.TraxsterRobotApp
     /// </summary>
     static class DeviceConstants
     {
-        public const int LED1_PIN = 101;
-        public const int LED2_PIN = 102;
-        public const int BUZZER_PIN = 103;
+        public const int LED_RIGHT_PIN = 0;
+        public const int LED_LEFT_PIN = 1;
+        //public const int BUZZER_PIN = 103;
 
-        public const int BUTTON1_PIN = 201;
-        public const int BUTTON2_PIN = 202;
+        public const int BUTTON_RIGHT_PIN = 4;
+        public const int BUTTON_MIDDLE_PIN = 5;
 
-        public const int LEFT_SENSOR_ID = 301;
-        public const int FRONT_SENSOR_ID = 302;
-        public const int RIGHT_SENSOR_ID = 303;
-        public const int REAR_SENSOR_ID = 304;
+        public const int LEFT_SENSOR_ID = 1;
+        public const int FRONT_SENSOR_ID = 3;
+        public const int RIGHT_SENSOR_ID = 2;
+        public const int REAR_SENSOR_ID = 0;
     }
 }

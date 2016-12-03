@@ -9,7 +9,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MovementFunctionality
     {
-        public const int LOOP_WAIT_TIME = 50;
+        public const int LOOP_WAIT_TIME = 200;
 
         private Robot _robot;
         private bool _stopped;
@@ -19,7 +19,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             _stopped = true;
         }
 
-        public async Task Logic()
+        public async Task StartLogic()
         {
             while (true)
             {
@@ -28,11 +28,11 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 //
                 if (_stopped)
                 {
-                    continue;
+                    Debug.WriteLine("Stopped");
                 }
                 else
                 {
-                    Debug.WriteLine("ASD");
+                    Debug.WriteLine("Running");
                     // Run logic
                 }
 

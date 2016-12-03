@@ -99,19 +99,26 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppLogic.cs" />
+    <Compile Include="ByteConverter.cs" />
     <Compile Include="DeviceConstants.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Exceptions.cs" />
+    <Compile Include="GertbotGeneral.cs" />
+    <Compile Include="GpioController.cs" />
     <Compile Include="Implementation\EmergencyStopObserver.cs" />
+    <Compile Include="Implementation\Enums.cs" />
+    <Compile Include="Implementation\Exceptions.cs" />
+    <Compile Include="Implementation\MainLogic.cs" />
     <Compile Include="Implementation\MovementFunctionality.cs" />
+    <Compile Include="Implementation\MutualData.cs" />
     <Compile Include="Implementation\SensorReader.cs" />
     <Compile Include="IUiDataSync.cs" />
-    <Compile Include="Implementation\MainLogic.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MotorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Robot.cs" />
+    <Compile Include="GertbotUartController.cs" />
+    <Compile Include="SensorController.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
