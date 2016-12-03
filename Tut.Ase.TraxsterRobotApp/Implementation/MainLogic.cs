@@ -41,11 +41,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 {
                     await Task.Delay(LOOP_WAIT_TIME);
 
-                    // Waits for user to press "Run" button
+                    // Waits for user to press run or stop button
                     if (_state == Enums.MainLogicStates.Stopped)
                     {
+                        bool[] pinStates = await _robot.readPins();
                         // Start-button pressed
-                        if (_robot.readPin(DeviceConstants.BUTTON1_PIN))
+                        // When button is pressed, pin changes to false
+                        if (! pinStates[DeviceConstants.BUTTON_MIDDLE_PIN])
                         {
                             _state = Enums.MainLogicStates.Run;
 
@@ -60,8 +62,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     }
                     if (_state == Enums.MainLogicStates.Run)
                     {
+                        bool[] pinStates = await _robot.readPins();
                         // Stop-button pressed
-                        if (_robot.readPin(DeviceConstants.BUTTON1_PIN))
+                        if (!pinStates[DeviceConstants.BUTTON_RIGHT_PIN])
                         {
                             _state = Enums.MainLogicStates.Stopped;
 
@@ -76,6 +79,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     if (_state == Enums.MainLogicStates.Emergency)
                     {
                         //TODO
+                        // Emergency-stop is validated with right-button
                         break;
                     }
                 }
@@ -88,6 +92,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 catch (Exception e)
                 {
                     //
+                    Debug.WriteLine("Encountered exception: " + e);
                 }
             }
             //await Task.WhenAll(task1, task2, task3);
