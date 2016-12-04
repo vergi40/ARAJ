@@ -9,7 +9,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MovementFunctionality
     {
-        public const int LOOP_WAIT_TIME = 200;
+        public const int LOOP_WAIT_TIME = 100;
 
         private Robot _robot;
         private bool _stopped;

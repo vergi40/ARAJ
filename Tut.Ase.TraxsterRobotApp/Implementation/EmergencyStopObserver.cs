@@ -8,7 +8,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class EmergencyStopObserver
     {
-        public const int LOOP_WAIT_TIME = 500;
+        public const int LOOP_WAIT_TIME = 100;
 
         private Robot _robot;
         private bool _stopped;

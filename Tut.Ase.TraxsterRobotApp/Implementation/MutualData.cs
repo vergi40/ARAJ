@@ -8,7 +8,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MutualData
     {
-        public const int LOOP_WAIT_TIME = 50;
+        public const int LOOP_WAIT_TIME = 500;
 
         private readonly Robot _robot;
         private Dictionary<Enums.Sensor, int> _rawSensorValues;
