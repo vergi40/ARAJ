@@ -39,10 +39,11 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         Queue<Dictionary<Enums.Sensor, int>> rawSensorValuesQueue = await _mutualData.ReadRawData();
 
                         // Filter raw data
-                        Dictionary<Enums.Sensor, int> filteredSensorValues = Filter(rawSensorValuesQueue);
+                        Dictionary<Enums.Sensor, double> filteredSensorValues = Filter(rawSensorValuesQueue);
 
                         // Save filtered data back to mutual data
                         _mutualData.WriteFilteredData(filteredSensorValues);
+
                     }
                 }
                 catch (Exception e)
@@ -52,15 +53,59 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
         }
 
-        private Dictionary<Enums.Sensor, int> Filter(Queue<Dictionary<Enums.Sensor, int>> values)
+        private Dictionary<Enums.Sensor, double> Filter(Queue<Dictionary<Enums.Sensor, int>> values)
         {
             //TODO
             // do stuff here
             // Equation
-            // ...
+            // d = 31000 / (r - 100)
+            var calculatedValuesContainer = new List<List<double>>();
+            foreach (var value in values)
+            {
+                var calculatedValuesForOneTick = new List<double>();
+
+                foreach (var sensor in value)
+                {
+                    double result = 0;
+
+                    if (sensor.Value - 100 != 0)
+                    {
+                        result = (double)31000/(sensor.Value - 100);
+                    }
+
+                    calculatedValuesForOneTick.Add(result);
+                }
+                calculatedValuesContainer.Add(calculatedValuesForOneTick);
+            }
+
             // circle buffer etc?
             // ...
-            return values.Peek();
+
+            // Quick test version with simple mean value
+            double leftSensorMeanValue = 0;
+            double frontSensorMeanValue = 0;
+            double rightSensorMeanValue = 0;
+            double rearSensorMeanValue = 0;
+
+            foreach (var oneTick in calculatedValuesContainer)
+            {
+                leftSensorMeanValue += oneTick[0];
+                frontSensorMeanValue += oneTick[1];
+                rightSensorMeanValue += oneTick[2];
+                rearSensorMeanValue += oneTick[3];
+            }
+
+            var valueCount = values.Count;
+            if (valueCount < 1)
+                valueCount = 1;
+            var filteredValues = new Dictionary<Enums.Sensor, double>();
+
+            filteredValues[Enums.Sensor.LeftSensor] = leftSensorMeanValue / valueCount;
+            filteredValues[Enums.Sensor.FrontSensor] = frontSensorMeanValue / valueCount;
+            filteredValues[Enums.Sensor.RightSensor] = rightSensorMeanValue / valueCount;
+            filteredValues[Enums.Sensor.RearSensor] = rearSensorMeanValue / valueCount;
+
+            return filteredValues;
         }
 
         public void Run()

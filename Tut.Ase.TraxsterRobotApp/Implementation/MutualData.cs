@@ -12,10 +12,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         private readonly Robot _robot;
         private Queue<Dictionary<Enums.Sensor, int>> _rawSensorValuesQueue;
-        private Dictionary<Enums.Sensor, int> _filteredSensorValues;
+        private Dictionary<Enums.Sensor, double> _filteredSensorValues;
 
         // Prevents access to critical areas
-        private object _rawDataLock = new object();
         private object _filteredDataLock = new object();
 
         public MutualData(Robot robot)
@@ -24,7 +23,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             _rawSensorValuesQueue = new Queue<Dictionary<Enums.Sensor, int>>();
         }
 
-        public void WriteFilteredData(Dictionary<Enums.Sensor, int> values)
+        public void WriteFilteredData(Dictionary<Enums.Sensor, double> values)
         {
             //TODO
             lock (_filteredDataLock)
@@ -37,7 +36,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// Returns last successfully filtered data to be used for navigation. 
         /// </summary>
         /// <returns></returns>
-        public Dictionary<Enums.Sensor, int> ReadFilteredData()
+        public Dictionary<Enums.Sensor, double> ReadFilteredData()
         {
             //TODO
             return _filteredSensorValues;
@@ -79,7 +78,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
 
             _rawSensorValuesQueue.Enqueue(rawSensorValues);
-            if (_rawSensorValuesQueue.Count > 100)
+
+            // For example 20 units means 20*50ms = 1000ms
+            
+            if (_rawSensorValuesQueue.Count > 20)
             {
                 _rawSensorValuesQueue.Dequeue();
             }

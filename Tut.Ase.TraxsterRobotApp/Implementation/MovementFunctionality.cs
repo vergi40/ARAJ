@@ -14,11 +14,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         private Robot _robot;
         private bool _stopped;
         private Enums.RobotRunMode _runMode;
+        private MutualData _mutualData;
         public MovementFunctionality(Robot robot, MutualData mutualData)
         {
             _robot = robot;
             _stopped = true;
             _runMode = Enums.RobotRunMode.Idle;
+            _mutualData = mutualData;
         }
 
         public async Task StartLogic()
@@ -39,7 +41,14 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     // Run logic
                     if (_runMode == Enums.RobotRunMode.Idle)
                     {
-                        //TODO
+                        // Wait a moment to acquire enough reliable sensor data
+                        await Task.Delay(1500);
+                        
+                        // Read filtered sensor values
+                        var sensorValues = _mutualData.ReadFilteredData();
+
+                        // Make decision based on the data
+                        _runMode = AnalyzeSensors(sensorValues);
                     }
                     else if (_runMode == Enums.RobotRunMode.FindWall)
                     {
@@ -72,13 +81,18 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         }
 
+        private Enums.RobotRunMode AnalyzeSensors(Dictionary<Enums.Sensor, double> sensorValues)
+        {
+            // TODO
+            //example
+            //do stuff
+
+            return Enums.RobotRunMode.FindWall;
+        }
+
         public void Run()
         {
             _stopped = false;
-            if (_runMode == Enums.RobotRunMode.Idle)
-            {
-                _runMode = Enums.RobotRunMode.FindWall;
-            }
         }
 
         public void Stop()
