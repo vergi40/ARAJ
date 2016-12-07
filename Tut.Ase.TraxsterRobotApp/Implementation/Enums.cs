@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tut.Ase.TraxsterRobotApp
+﻿namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     public class Enums
     {
@@ -17,10 +11,19 @@ namespace Tut.Ase.TraxsterRobotApp
 
         public enum RobotRunMode
         {
-            SearchWall,
+            FindWall,
+            Turn,
             FollowWall,
-            WallApproach,
-            WallEnding
+            Turn90,
+            Idle
+        };
+
+        public enum Sensor
+        {
+            LeftSensor,
+            FrontSensor,
+            RightSensor,
+            RearSensor
         };
     }
 }

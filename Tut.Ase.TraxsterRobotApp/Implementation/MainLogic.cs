@@ -25,10 +25,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// <returns></returns>
         public async Task StartLogic()
         {
+            // Initialize shared data
+            MutualData mutualData = new MutualData(_robot);
+
             // Initialize concurrent objects
-            MovementFunctionality movementFunctions = new MovementFunctionality(_robot);
-            SensorReader sensorReader = new SensorReader(_robot);
-            EmergencyStopObserver observer = new EmergencyStopObserver(_robot);
+            MovementFunctionality movementFunctions = new MovementFunctionality(_robot, mutualData);
+            SensorReader sensorReader = new SensorReader(mutualData);
+            EmergencyStopObserver observer = new EmergencyStopObserver(_robot, mutualData);
 
             Task.Run(() => movementFunctions.StartLogic());
             Task.Run(() => sensorReader.StartLogic());

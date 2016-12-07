@@ -8,11 +8,11 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class EmergencyStopObserver
     {
-        public const int LOOP_WAIT_TIME = 500;
+        public const int LOOP_WAIT_TIME = 100;
 
         private Robot _robot;
         private bool _stopped;
-        public EmergencyStopObserver(Robot robot)
+        public EmergencyStopObserver(Robot robot, MutualData mutualData)
         {
             _robot = robot;
             _stopped = true;
@@ -32,6 +32,13 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 else
                 {
                     // Run logic
+
+                    // Read filtered data 
+                    // TODO
+
+                    // Analyze
+                    // TODO
+                    
                 }
 
 
