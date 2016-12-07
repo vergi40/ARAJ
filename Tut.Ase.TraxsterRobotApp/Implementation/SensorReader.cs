@@ -36,10 +36,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     else
                     {
                         // Acquire raw data
-                        Dictionary<Enums.Sensor, int> rawSensorValues = await _mutualData.ReadRawData();
+                        Queue<Dictionary<Enums.Sensor, int>> rawSensorValuesQueue = await _mutualData.ReadRawData();
 
                         // Filter raw data
-                        Dictionary<Enums.Sensor, int> filteredSensorValues = Filter(rawSensorValues);
+                        Dictionary<Enums.Sensor, int> filteredSensorValues = Filter(rawSensorValuesQueue);
 
                         // Save filtered data back to mutual data
                         _mutualData.WriteFilteredData(filteredSensorValues);
@@ -52,7 +52,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
         }
 
-        private Dictionary<Enums.Sensor, int> Filter(Dictionary<Enums.Sensor, int> values)
+        private Dictionary<Enums.Sensor, int> Filter(Queue<Dictionary<Enums.Sensor, int>> values)
         {
             //TODO
             // do stuff here
@@ -60,7 +60,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             // ...
             // circle buffer etc?
             // ...
-            return values;
+            return values.Peek();
         }
 
         public void Run()

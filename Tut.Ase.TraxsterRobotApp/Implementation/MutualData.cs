@@ -11,7 +11,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public const int LOOP_WAIT_TIME = 500;
 
         private readonly Robot _robot;
-        private Dictionary<Enums.Sensor, int> _rawSensorValues;//TODO: need easy to use list of values
+        private Queue<Dictionary<Enums.Sensor, int>> _rawSensorValuesQueue;
         private Dictionary<Enums.Sensor, int> _filteredSensorValues;
 
         // Prevents access to critical areas
@@ -21,6 +21,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public MutualData(Robot robot)
         {
             this._robot = robot;
+            _rawSensorValuesQueue = new Queue<Dictionary<Enums.Sensor, int>>();
         }
 
         public void WriteFilteredData(Dictionary<Enums.Sensor, int> values)
@@ -32,13 +33,21 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
         }
 
+        /// <summary>
+        /// Returns last successfully filtered data to be used for navigation. 
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<Enums.Sensor, int> ReadFilteredData()
         {
             //TODO
             return _filteredSensorValues;
         }
 
-        public async Task<Dictionary<Enums.Sensor, int>> ReadRawData()
+        /// <summary>
+        /// Reads raw data from sensors and saves it to 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<Queue<Dictionary<Enums.Sensor, int>>> ReadRawData()
         {
             int leftSensor = 0;
             int frontSensor = 0;
@@ -69,7 +78,12 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             rawSensorValues[Enums.Sensor.RightSensor] = rightSensor;
             rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
 
-            return rawSensorValues;
+            _rawSensorValuesQueue.Enqueue(rawSensorValues);
+            if (_rawSensorValuesQueue.Count > 100)
+            {
+                _rawSensorValuesQueue.Dequeue();
+            }
+            return _rawSensorValuesQueue;
         }
     }
 }
