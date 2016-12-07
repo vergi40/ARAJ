@@ -11,36 +11,58 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public const int LOOP_WAIT_TIME = 500;
 
         private readonly Robot _robot;
-        private Dictionary<Enums.Sensor, int> _rawSensorValues;
-        private List<int> _filteredSensorValue;
+        private Dictionary<Enums.Sensor, int> _rawSensorValues;//TODO: need easy to use list of values
+        private Dictionary<Enums.Sensor, int> _filteredSensorValues;
 
         // Prevents access to critical areas
-        private object _rawDataLock;
-        private object _filteredDataLock;
+        private object _rawDataLock = new object();
+        private object _filteredDataLock = new object();
 
-        public MutualData(Robot _robot)
+        public MutualData(Robot robot)
         {
-            this._robot = _robot;
+            this._robot = robot;
         }
 
-        public void WriteFilteredData()
+        public void WriteFilteredData(Dictionary<Enums.Sensor, int> values)
         {
-
+            //TODO
+            lock (_filteredDataLock)
+            {
+                _filteredSensorValues = values;
+            }
         }
 
-        public void ReadFilteredData()
+        public Dictionary<Enums.Sensor, int> ReadFilteredData()
         {
-
+            //TODO
+            return _filteredSensorValues;
         }
 
         public async Task<Dictionary<Enums.Sensor, int>> ReadRawData()
         {
-            // Read raw values and save them to mutual data
-            int leftSensor = await _robot.getSensorValue(DeviceConstants.LEFT_SENSOR_ID);
-            int frontSensor = await _robot.getSensorValue(DeviceConstants.FRONT_SENSOR_ID);
-            int rightSensor = await _robot.getSensorValue(DeviceConstants.RIGHT_SENSOR_ID);
-            int rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
+            int leftSensor = 0;
+            int frontSensor = 0;
+            int rightSensor = 0;
+            int rearSensor = 0;
 
+            for (int i=0;i<3;i++)
+            {
+                // Very eager to throw exceptions
+                try
+                {
+                    // Read raw values and save them to mutual data
+                    leftSensor = await _robot.getSensorValue(DeviceConstants.LEFT_SENSOR_ID);
+                    frontSensor = await _robot.getSensorValue(DeviceConstants.FRONT_SENSOR_ID);
+                    rightSensor = await _robot.getSensorValue(DeviceConstants.RIGHT_SENSOR_ID);
+                    rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
+
+                    break;
+                }
+                catch (Exception e)
+                {
+                    // Catch random generated exceptions
+                }
+            }
             Dictionary<Enums.Sensor, int> rawSensorValues = new Dictionary<Enums.Sensor, int>();
             rawSensorValues[Enums.Sensor.LeftSensor] = leftSensor;
             rawSensorValues[Enums.Sensor.FrontSensor] = frontSensor;

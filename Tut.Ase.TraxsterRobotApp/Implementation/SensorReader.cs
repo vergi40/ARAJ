@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,22 +27,40 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 await Task.Delay(LOOP_WAIT_TIME);
 
                 //
-                if (_stopped)
+                try
                 {
-                    continue;
+                    if (_stopped)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        // Acquire raw data
+                        Dictionary<Enums.Sensor, int> rawSensorValues = await _mutualData.ReadRawData();
+
+                        // Filter raw data
+                        Dictionary<Enums.Sensor, int> filteredSensorValues = Filter(rawSensorValues);
+
+                        // Save filtered data back to mutual data
+                        _mutualData.WriteFilteredData(filteredSensorValues);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    // Acquire raw data
-                    Dictionary<Enums.Sensor, int> rawSensorValues = await _mutualData.ReadRawData();
-
-                    // Filter raw data
-                    // TODO
-
-                    // Save filtered data back to mutual data
-                    // TODO
+                    // Catch random generated exceptions
                 }
             }
+        }
+
+        private Dictionary<Enums.Sensor, int> Filter(Dictionary<Enums.Sensor, int> values)
+        {
+            //TODO
+            // do stuff here
+            // Equation
+            // ...
+            // circle buffer etc?
+            // ...
+            return values;
         }
 
         public void Run()
