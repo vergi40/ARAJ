@@ -11,6 +11,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     {
         public const int LOOP_WAIT_TIME = 100;
         public const int TRAVEL_DISTANCE_FROM_WALL = 20; // cm
+        public const int SENSOR_TOP_LIMIT = 80; // cm
+        public const int SENSOR_BOTTOM_LIMIT = 10; // cm
         public const int SIDESENSOR_ANGLE = 40;
 
 
@@ -18,6 +20,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         private bool _stopped;
         private double _turningDegrees;
         private Enums.RobotRunMode _runMode;
+        private bool _nextToTheWall;
 
         public Enums.RobotRunMode RunMode
         {
@@ -37,7 +40,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         {
             _robot = robot;
             _stopped = true;
-            _turningDegrees = 0;
+            _turningDegrees = -1;
+            _nextToTheWall = false;
             RunMode = Enums.RobotRunMode.Idle;
             _mutualData = mutualData;
         }
@@ -72,13 +76,14 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             // Make decision based on the data
                             RunMode = AnalyzeSensorsWhenIdle(sensorValues);
                         }
+
                         // Robot doesn't see a wall, run forward till it does.
                         // If wall is seen on the side sensor closer, turn to that direction
                         else if (RunMode == Enums.RobotRunMode.FindWall)
                         {
                             // Read filtered sensor values
                             var sensorValues = _mutualData.ReadFilteredData();
-                            while (sensorValues[Enums.Sensor.FrontSensor] > TRAVEL_DISTANCE_FROM_WALL)
+                            while (sensorValues[Enums.Sensor.FrontSensor] > TRAVEL_DISTANCE_FROM_WALL && !_stopped)
                             {
                                 ControlMotors(100, 100);
                                 sensorValues = _mutualData.ReadFilteredData();
@@ -109,8 +114,11 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
                             // Turn along the wall
                             _turningDegrees = 270;
+                            _nextToTheWall = true;
                             RunMode = Enums.RobotRunMode.Turn;
                         }
+
+
                         else if (RunMode == Enums.RobotRunMode.FollowWall)
                         {
                             //TODO
@@ -118,9 +126,23 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             ControlMotors(100, 100);
 
                         }
+
+
                         else if (RunMode == Enums.RobotRunMode.Turn)
                         {
-                            //TODO
+                            // Error in code logic
+                            if (_turningDegrees < 0)
+                            {
+                                RunMode = Enums.RobotRunMode.FindWall;
+                            }
+                            else
+                            {
+                                double degrees = _turningDegrees;
+                                if (degrees > 180)
+                                    degrees -= 360;
+
+                                await RotateRobot(degrees);
+                            }
                         }
                         else if (RunMode == Enums.RobotRunMode.Turn90)
                         {
@@ -132,6 +154,59 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 {
                     // Random exception
                 }
+            }
+        }
+
+        /// <summary>
+        /// Rotates the robot either facing straight to the wall or leaving the wall on the right side.
+        /// </summary>
+        /// <param name="degrees"></param>
+        /// <returns></returns>
+        private async Task RotateRobot(double degrees)
+        {
+            var sensorValues = _mutualData.ReadFilteredData();
+            bool clockwise = false;
+            if (degrees > 0)
+            {
+                clockwise = true;
+            }
+
+            // Rotate till only right sensor sees something
+            if (_nextToTheWall)
+            {
+                // TODO: needs testing how fast robot rotates
+                while (! IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]) && !_stopped)
+                {
+                    ControlMotors(100, -100, clockwise);
+                    sensorValues = _mutualData.ReadFilteredData();
+                    await Task.Delay(500);
+                }
+
+                RunMode = Enums.RobotRunMode.FollowWall;
+            }
+
+            // Rotate till the front sensor has closer range than left or right
+            else
+            {
+                // TODO: needs testing how fast robot rotates
+                while (! _stopped) // just in case
+                {
+                    ControlMotors(100, -100, clockwise);
+                    sensorValues = _mutualData.ReadFilteredData();
+
+                    if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
+                    {
+                        if (sensorValues[Enums.Sensor.FrontSensor] < sensorValues[Enums.Sensor.LeftSensor] && 
+                            sensorValues[Enums.Sensor.FrontSensor] < sensorValues[Enums.Sensor.RightSensor])
+                        {
+                            break;
+                        }
+                    }
+
+                    await Task.Delay(500);
+                }
+
+                RunMode = Enums.RobotRunMode.FindWall;
             }
         }
 
@@ -197,7 +272,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         private bool IsSensorValueInReach(double sensorValue)
         {
             //TODO: need limits for sensor values
-            if (sensorValue > 10 && sensorValue < 80)
+            if (sensorValue > SENSOR_BOTTOM_LIMIT && sensorValue < SENSOR_TOP_LIMIT)
             {
                 return true;
             }
@@ -217,9 +292,20 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         }
 
-        private void ControlMotors(int leftMotor, int rightMotor)
+        /// <summary>
+        /// Motor parameters are given as if turning clockwise direction everytime.
+        /// </summary>
+        /// <param name="leftMotor"></param>
+        /// <param name="rightMotor"></param>
+        /// <param name="clockwise"></param>
+        private void ControlMotors(int leftMotor, int rightMotor, bool clockwise = true)
         {
             //TODO
+            if (!clockwise)
+            {
+                leftMotor = -leftMotor;
+                rightMotor = -rightMotor;
+            }
             _robot.setMotorSpeed(leftMotor, rightMotor);
         }
     }
