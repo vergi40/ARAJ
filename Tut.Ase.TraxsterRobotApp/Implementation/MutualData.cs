@@ -8,8 +8,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MutualData
     {
-        public const int LOOP_WAIT_TIME = 500;
-
         private readonly Robot _robot;
         private Queue<Dictionary<Enums.Sensor, int>> _rawSensorValuesQueue;
         private Dictionary<Enums.Sensor, double> _filteredSensorValues;
@@ -79,9 +77,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
             _rawSensorValuesQueue.Enqueue(rawSensorValues);
 
-            // For example 20 units means 20*50ms = 1000ms
+            // For example 10 units means 10*50ms = 1000ms
             
-            if (_rawSensorValuesQueue.Count > 20)
+            if (_rawSensorValuesQueue.Count > 10)
             {
                 _rawSensorValuesQueue.Dequeue();
             }

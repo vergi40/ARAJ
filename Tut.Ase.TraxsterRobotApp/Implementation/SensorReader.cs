@@ -9,7 +9,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class SensorReader
     {
-        public const int LOOP_WAIT_TIME = 50;
+        public const int LOOP_WAIT_TIME = 100;
 
         private bool _stopped;
         private MutualData _mutualData;
@@ -53,6 +53,20 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
         }
 
+        /// <summary>
+        /// AD-converter equationg values demonstrated below
+        ///     filtered value
+        ///        ^
+        ///    30- |  |
+        ///        |   \
+        ///        |     -----
+        /// -------|----------- ->  raw value
+        /// --     |        5000
+        ///    \   |
+        ///     |  |
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
         private Dictionary<Enums.Sensor, double> Filter(Queue<Dictionary<Enums.Sensor, int>> values)
         {
             //TODO
@@ -71,6 +85,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     if (sensor.Value - 100 != 0)
                     {
                         result = (double)31000/(sensor.Value - 100);
+                        if (result < 0)
+                        {
+                            result = -result;
+                        }
                     }
 
                     calculatedValuesForOneTick.Add(result);

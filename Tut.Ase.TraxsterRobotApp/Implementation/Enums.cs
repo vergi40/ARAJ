@@ -9,6 +9,9 @@
             Emergency
         };
 
+        /// <summary>
+        /// States for robot movement
+        /// </summary>
         public enum RobotRunMode
         {
             FindWall,
@@ -18,6 +21,9 @@
             Idle
         };
 
+        /// <summary>
+        /// Sensor referenced
+        /// </summary>
         public enum Sensor
         {
             LeftSensor,
