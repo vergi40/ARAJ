@@ -6,7 +6,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MainLogic
     {
-        public const int LOOP_WAIT_TIME = 50;
+        public const int LOOP_WAIT_TIME = 500;
 
         private Robot _robot;
 
