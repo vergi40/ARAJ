@@ -42,7 +42,21 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             {
                 try
                 {
-                    await Task.Delay(LOOP_WAIT_TIME);
+                    // Emergency stop handling
+                    if (observer.IsEmergencyStopEncountered && _state != Enums.MainLogicStates.Emergency)
+                    {
+                        _state = Enums.MainLogicStates.Emergency;
+
+                        // Shut down / reset the threads
+                        movementFunctions.Stop();
+                        sensorReader.Stop();
+                        observer.Stop();
+                    }
+                    // Delay each loop if robot is running normally
+                    else
+                    {
+                        await Task.Delay(LOOP_WAIT_TIME);
+                    }
 
                     // Waits for user to press run or stop button
                     if (_state == Enums.MainLogicStates.Stopped)
@@ -83,22 +97,21 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     {
                         //TODO
                         // Emergency-stop is validated with right-button
-                        break;
+                        continue;
                     }
                 }
 
-                    // All exception handling / state changing here
-                catch (EmergencyStopException)
-                {
-                    _state = Enums.MainLogicStates.Emergency;
-                }
+                // Random exception handling
+                //catch (EmergencyStopException)
+                //{
+                //    _state = Enums.MainLogicStates.Emergency;
+                //}
                 catch (Exception e)
                 {
                     //
                     Debug.WriteLine("Encountered exception: " + e);
                 }
             }
-            //await Task.WhenAll(task1, task2, task3);
         }
     }
 }

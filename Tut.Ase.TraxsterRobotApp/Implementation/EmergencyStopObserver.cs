@@ -14,12 +14,25 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         private Robot _robot;
         private bool _stopped;
+        private bool _isEmergencyStopEncountered;
         private MutualData _mutualData;
+
+
+        /// <summary>
+        /// Tells publicly if program should change to emergency state
+        /// </summary>
+        public bool IsEmergencyStopEncountered
+        {
+            get { return _isEmergencyStopEncountered; }
+            set { _isEmergencyStopEncountered = value; }
+        }
+
         public EmergencyStopObserver(Robot robot, MutualData mutualData)
         {
             _robot = robot;
             _stopped = true;
             _mutualData = mutualData;
+            _isEmergencyStopEncountered = false;
         }
 
         public async Task StartLogic()
@@ -50,7 +63,11 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             {
                                 Debug.WriteLine("EMERGENCY STATE");
                                 // Throw exception if wall too close
-                                throw new EmergencyStopException();
+                                //throw new EmergencyStopException();
+
+                                // MainLogic will see this
+                                IsEmergencyStopEncountered = true;
+                                break;
                             }
                         }
                     }
@@ -61,10 +78,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         Debug.WriteLine("Encountered NullReferenceException at observer");
                     }
                     // Prevent task silent crash
-                    catch (EmergencyStopException)
-                    {
+                    //catch (EmergencyStopException)
+                    //{
 
-                    }
+                    //}
 
                 }
 
@@ -76,6 +93,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public void Run()
         {
             _stopped = false;
+            IsEmergencyStopEncountered = false;
         }
 
         public void Stop()
