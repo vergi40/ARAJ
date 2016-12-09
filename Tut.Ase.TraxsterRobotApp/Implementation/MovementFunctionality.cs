@@ -10,10 +10,14 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     class MovementFunctionality
     {
         public const int LOOP_WAIT_TIME = 100;
+
         public const int TRAVEL_DISTANCE_FROM_WALL = 20; // cm
         public const int SENSOR_TOP_LIMIT = 80; // cm
         public const int SENSOR_BOTTOM_LIMIT = 10; // cm
+        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 50;
+
         public const int SIDESENSOR_ANGLE = 40;
+
 
 
         private Robot _robot;
@@ -118,12 +122,37 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             RunMode = Enums.RobotRunMode.Turn;
                         }
 
-
+                        // Continues straight, till wall makes turn. Tries to follow it smoothly
                         else if (RunMode == Enums.RobotRunMode.FollowWall)
                         {
-                            //TODO
-                            // Continue straight forward
-                            ControlMotors(100, 100);
+                            int margin = 5;
+
+                            while (!_stopped)
+                            {
+                                var sensorValues = _mutualData.ReadFilteredData();
+                                double rightSensor = sensorValues[Enums.Sensor.RightSensor];
+
+                                // Continue straight if right sensor shows optimal reading
+                                // and front sensor sees nothing
+                                if (! IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]) &&
+                                    rightSensor > IDEAL_RIGHT_SENSOR_DISTANCE - margin &&
+                                    rightSensor < IDEAL_RIGHT_SENSOR_DISTANCE + margin)
+                                {
+                                    ControlMotors(100, 100);
+                                }
+                                // Wall turns 90 degrees or more
+                                // TODO
+                                // Wall not seen on right anymore
+                                // TODO
+
+                                // Turn smoothly
+                                else
+                                {
+                                    MakeSmoothOrientationCorrection(rightSensor, margin);
+                                }
+
+                                await Task.Delay(LOOP_WAIT_TIME);
+                            }
 
                         }
 
@@ -159,6 +188,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         /// <summary>
         /// Rotates the robot either facing straight to the wall or leaving the wall on the right side.
+        /// Assumes that robot is already situated close to wall in some direction.
         /// </summary>
         /// <param name="degrees"></param>
         /// <returns></returns>
@@ -207,6 +237,45 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
 
                 RunMode = Enums.RobotRunMode.FindWall;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rightSensorValue"></param>
+        /// <returns></returns>
+        private void MakeSmoothOrientationCorrection(double rightSensorValue, double margin)
+        {
+            // Turn right
+            if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin*4)
+            {
+                ControlMotors(100, 40);
+            }
+            else if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin*2)
+            {
+                ControlMotors(100, 70);
+            }
+            else if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin)
+            {
+                ControlMotors(100, 80);
+            }
+            // Turn left
+            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*8)
+            {
+                ControlMotors(0, 100);
+            }
+            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*4)
+            {
+                ControlMotors(40, 100);
+            }
+            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*2)
+            {
+                ControlMotors(70, 100);
+            }
+            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin)
+            {
+                ControlMotors(80, 100);
             }
         }
 
