@@ -16,8 +16,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         {
             _robot = robot;
             _state = Enums.MainLogicStates.Stopped;
-
         }
+
 
         /// <summary>
         /// Starts and runs the main logic
@@ -37,6 +37,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             Task.Run(() => sensorReader.StartLogic());
             Task.Run(() => observer.StartLogic());
 
+            ledControl();
+
             // Background loop for everything, always running
             while (true)
             {
@@ -51,6 +53,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         movementFunctions.Stop();
                         sensorReader.Stop();
                         observer.Stop();
+
                     }
                     // Delay each loop if robot is running normally
                     else
@@ -64,7 +67,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         bool[] pinStates = await _robot.readPins();
                         // Start-button pressed
                         // When button is pressed, pin changes to false
-                        if (! pinStates[DeviceConstants.BUTTON_MIDDLE_PIN])
+                        if (!pinStates[DeviceConstants.BUTTON_MIDDLE_PIN])
                         {
                             _state = Enums.MainLogicStates.Run;
 
@@ -72,7 +75,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             movementFunctions.Run();
                             sensorReader.Run();
                             observer.Run();
-                            
+
                             continue;
                         }
 
@@ -95,20 +98,82 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     }
                     if (_state == Enums.MainLogicStates.Emergency)
                     {
-                        //TODO
+                        bool[] pinStates = await _robot.readPins();
+                        
                         // Emergency-stop is validated with right-button
+                        if (!pinStates[DeviceConstants.BUTTON_RIGHT_PIN])
+                        {
+                            _state = Enums.MainLogicStates.Stopped;
+                            Debug.WriteLine("EMERGENCYSTOP RESETED");
+
+                        }
+
                         continue;
                     }
                 }
 
                 // Random exception handling
-                //catch (EmergencyStopException)
-                //{
-                //    _state = Enums.MainLogicStates.Emergency;
-                //}
                 catch (Exception e)
                 {
                     //
+                    Debug.WriteLine("Encountered exception: " + e);
+                }
+            }
+        }
+
+        private async Task ledControl()
+        {
+            bool leftLedState = false;
+            bool rightLedState = false;
+
+            while (true)
+            {
+                try
+                {
+                    bool[] pinStates = await _robot.readPins();
+
+                    // Run -mode -> constant left led on
+                    if (_state == Enums.MainLogicStates.Run)
+                    {
+                        leftLedState = true;
+                    }
+
+                    // Emergency -mode -> left & right led alternately blinking
+                    else if (_state == Enums.MainLogicStates.Emergency)
+                    {
+                        if (leftLedState)
+                        {
+                            leftLedState = false;
+                            rightLedState = true;
+                        }
+                        else
+                        {
+                            leftLedState = true;
+                            rightLedState = false;
+                        }
+                    }
+                    // Stopped -mode -> left led blinking, right off
+                    else if (_state == Enums.MainLogicStates.Stopped)
+                    {
+                        if (leftLedState)
+                        {
+                            leftLedState = false;
+                        }
+                        else
+                        {
+                            leftLedState = true;
+                        }
+                        rightLedState = false;
+                    }
+
+                    pinStates[DeviceConstants.LED_LEFT_PIN] = leftLedState;
+                    pinStates[DeviceConstants.LED_RIGHT_PIN] = rightLedState;
+
+                    await _robot.writePins(pinStates);
+                    await Task.Delay(400);
+                }
+                catch (Exception e)
+                {
                     Debug.WriteLine("Encountered exception: " + e);
                 }
             }

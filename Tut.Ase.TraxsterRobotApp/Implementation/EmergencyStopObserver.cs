@@ -77,11 +77,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     {
                         Debug.WriteLine("Encountered NullReferenceException at observer");
                     }
-                    // Prevent task silent crash
-                    //catch (EmergencyStopException)
-                    //{
-
-                    //}
 
                 }
 
@@ -99,6 +94,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public void Stop()
         {
             _stopped = true;
+            IsEmergencyStopEncountered = false;
         }
     }
 }
