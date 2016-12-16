@@ -11,10 +11,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     {
         public const int LOOP_WAIT_TIME = 100;
 
-        public const int TRAVEL_DISTANCE_FROM_WALL = 20; // cm
+        public const int TRAVEL_DISTANCE_FROM_WALL = 30; // cm
         public const int SENSOR_TOP_LIMIT = 80; // cm
         public const int SENSOR_BOTTOM_LIMIT = 10; // cm
-        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 50;
+        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 30;
 
         public const int SIDESENSOR_ANGLE = 40;
 
@@ -71,6 +71,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         // Robot started
                         if (RunMode == Enums.RobotRunMode.Idle)
                         {
+
+                            Debug.WriteLine("Run mode: Idle");
                             // Wait a moment to acquire enough reliable sensor data
                             await Task.Delay(1500);
                         
@@ -85,6 +87,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         // If wall is seen on the side sensor closer, turn to that direction
                         else if (RunMode == Enums.RobotRunMode.FindWall)
                         {
+                            Debug.WriteLine("Run mode: Find wall");
+
                             // Read filtered sensor values
                             var sensorValues = _mutualData.ReadFilteredData();
                             while (sensorValues[Enums.Sensor.FrontSensor] > TRAVEL_DISTANCE_FROM_WALL && !_stopped)
@@ -125,6 +129,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         // Continues straight, till wall makes turn. Tries to follow it smoothly
                         else if (RunMode == Enums.RobotRunMode.FollowWall)
                         {
+                            Debug.WriteLine("Run mode: Follow wall");
+
                             int margin = 5;
 
                             while (!_stopped)
@@ -159,6 +165,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
                         else if (RunMode == Enums.RobotRunMode.Turn)
                         {
+                            Debug.WriteLine("Run mode: Turn. Turning degrees: " + _turningDegrees);
+
                             // Error in code logic
                             if (_turningDegrees < 0)
                             {
@@ -194,6 +202,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// <returns></returns>
         private async Task RotateRobot(double degrees)
         {
+            ControlMotors(0, 0);
+
             var sensorValues = _mutualData.ReadFilteredData();
             bool clockwise = false;
             if (degrees > 0)
@@ -356,7 +366,15 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public void Stop()
         {
             _stopped = true;
-            ControlMotors(0, 0);
+
+            int i = 0;
+            while (i<5)
+            {
+                ControlMotors(0, 0);
+                i++;
+                Task.Delay(100);
+            }
+            
             RunMode = Enums.RobotRunMode.Idle;
 
         }

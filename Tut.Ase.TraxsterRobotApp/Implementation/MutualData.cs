@@ -8,6 +8,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MutualData
     {
+        public const int FILTER_BUFFER_SIZE = 3;
         private readonly Robot _robot;
         private Queue<Dictionary<Enums.Sensor, int>> _rawSensorValuesQueue;
         private Dictionary<Enums.Sensor, double> _filteredSensorValues;
@@ -122,7 +123,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
             // For example 10 units means 10*50ms = 1000ms
             
-            if (_rawSensorValuesQueue.Count > 10)
+            if (_rawSensorValuesQueue.Count > FILTER_BUFFER_SIZE)
             {
                 _rawSensorValuesQueue.Dequeue();
             }
