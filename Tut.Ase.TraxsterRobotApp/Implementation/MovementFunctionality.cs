@@ -170,7 +170,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                 if (degrees > 180)
                                     degrees -= 360;
 
-                                await RotateRobot(degrees);
+                                RotateRobot(degrees).Wait();
                             }
                         }
                         else if (RunMode == Enums.RobotRunMode.Turn90)
@@ -207,7 +207,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 // TODO: needs testing how fast robot rotates
                 while (! IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]) && !_stopped)
                 {
-                    ControlMotors(100, -100, clockwise);
+                    ControlMotors(0, -100, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
                     await Task.Delay(500);
                 }
@@ -221,7 +221,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 // TODO: needs testing how fast robot rotates
                 while (! _stopped) // just in case
                 {
-                    ControlMotors(100, -100, clockwise);
+                    ControlMotors(0, -100, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
 
                     if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
@@ -369,13 +369,25 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// <param name="clockwise"></param>
         private void ControlMotors(int leftMotor, int rightMotor, bool clockwise = true)
         {
-            //TODO
-            if (!clockwise)
+            for (int i=0;i<4;i++)
             {
-                leftMotor = -leftMotor;
-                rightMotor = -rightMotor;
+                try
+                {
+                    // Turn counter-clockwise - reverse motors
+                    if (!clockwise)
+                    {
+                        int tempLeftMotor = leftMotor;
+                        leftMotor = rightMotor;
+                        rightMotor = tempLeftMotor;
+                    }
+                    _robot.setMotorSpeed(leftMotor, rightMotor);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    // random exception
+                }
             }
-            _robot.setMotorSpeed(leftMotor, rightMotor);
         }
     }
 }
