@@ -70,17 +70,16 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     try
                                     {
                                         // fast motor stop
-                                        _robot.setMotorSpeed(0, 0);
-                                        break;
+                                        await _robot.setMotorSpeed(0, 0);
                                     }
-
-                                    
+                                                                        
                                     catch (Exception)
                                     {
                                         // Catch random exceptions
                                     }
                                     await Task.Delay(50);
                                 }
+
                                 break;
                             }
                         }
@@ -107,8 +106,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
         public void Stop()
         {
-            _stopped = true;
             IsEmergencyStopEncountered = false;
+            Task.Delay(200);
+            _stopped = true;
+            
         }
     }
 }
