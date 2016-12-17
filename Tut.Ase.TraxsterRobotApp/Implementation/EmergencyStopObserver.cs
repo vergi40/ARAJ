@@ -62,16 +62,25 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             if (sensor.Value < SAFETY_DISTANCE)
                             {
                                 Debug.WriteLine("EMERGENCY STATE");
-                                _robot.setMotorSpeed(0, 0);
-                                _robot.setMotorSpeed(0, 0);
-                                _robot.setMotorSpeed(0, 0);
-                                _robot.setMotorSpeed(0, 0);
-                                _robot.setMotorSpeed(0, 0);
-                                // Throw exception if wall too close
-                                //throw new EmergencyStopException();
-
                                 // MainLogic will see this
                                 IsEmergencyStopEncountered = true;
+
+                                for (int i = 0; i < 5; i++)
+                                {
+                                    try
+                                    {
+                                        // fast motor stop
+                                        _robot.setMotorSpeed(0, 0);
+                                        break;
+                                    }
+
+                                    
+                                    catch (Exception)
+                                    {
+                                        // Catch random exceptions
+                                    }
+                                    await Task.Delay(50);
+                                }
                                 break;
                             }
                         }

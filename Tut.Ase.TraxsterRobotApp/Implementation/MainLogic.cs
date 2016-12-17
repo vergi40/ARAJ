@@ -37,7 +37,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             Task.Run(() => sensorReader.StartLogic());
             Task.Run(() => observer.StartLogic());
 
-            ledControl();
+            ledControl(movementFunctions);
 
             // Background loop for everything, always running
             while (true)
@@ -121,7 +121,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
         }
 
-        private async Task ledControl()
+        private async Task ledControl(MovementFunctionality movementFunctions)
         {
             bool leftLedState = false;
             bool rightLedState = false;
@@ -132,10 +132,33 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 {
                     bool[] pinStates = await _robot.readPins();
 
-                    // Run -mode -> constant left led on
+                    // Run -mode -> constant left led on + right led by substates
                     if (_state == Enums.MainLogicStates.Run)
                     {
                         leftLedState = true;
+
+                        // FollowWall -mode -> right led on
+                        if (movementFunctions.RunMode == Enums.RobotRunMode.FollowWall)
+                        {
+                            rightLedState = true;
+                        }
+                        // Idle -mode -> right led on
+                        else if (movementFunctions.RunMode == Enums.RobotRunMode.Idle)
+                        {
+                            rightLedState = false;
+                        }
+                        // Findwall, Turn -modes right led blinking
+                        else
+                        {
+                            if (rightLedState)
+                            {
+                                rightLedState = false;
+                            }
+                            else
+                            {
+                                rightLedState = true;
+                            }
+                        }
                     }
 
                     // Emergency -mode -> left & right led alternately blinking
