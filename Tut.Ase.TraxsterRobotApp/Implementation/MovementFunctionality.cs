@@ -34,7 +34,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             }
             set
             {
-                Debug.WriteLine("Robot run mode changed to: " + value);
+                //Debug.WriteLine("Robot run mode changed to: " + value);
                 _runMode = value;
             }
         }
@@ -91,15 +91,25 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
                             // Read filtered sensor values
                             var sensorValues = _mutualData.ReadFilteredData();
-                            while (sensorValues[Enums.Sensor.FrontSensor] > TRAVEL_DISTANCE_FROM_WALL && !_stopped)
+                            double margin = 5;
+                            while (!_stopped)
                             {
                                 ControlMotors(100, 100);
                                 sensorValues = _mutualData.ReadFilteredData();
-                                await Task.Delay(LOOP_WAIT_TIME);
+
+                                if (sensorValues[Enums.Sensor.FrontSensor] < TRAVEL_DISTANCE_FROM_WALL + margin)
+                                {
+                                    ControlMotors(0, 0);
+                                    _turningDegrees = 270;
+                                    _nextToTheWall = true;
+                                    RunMode = Enums.RobotRunMode.Turn;
+                                    break;
+                                }
 
                                 // Wall is seen on side sensors first
                                 // Left side
-                                if (IsSensorValueInReach(sensorValues[Enums.Sensor.LeftSensor]))
+                                if (IsSensorValueInReach(sensorValues[Enums.Sensor.LeftSensor]) &&
+                                    IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
                                 {
                                     if (sensorValues[Enums.Sensor.FrontSensor] > sensorValues[Enums.Sensor.LeftSensor])
                                     {
@@ -109,7 +119,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     }
                                 }
                                 // Right side
-                                if (IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
+                                if (IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]) &&
+                                    IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
                                 {
                                     if (sensorValues[Enums.Sensor.FrontSensor] > sensorValues[Enums.Sensor.RightSensor])
                                     {
@@ -118,12 +129,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                         break;
                                     }
                                 }
-                            }
 
-                            // Turn along the wall
-                            _turningDegrees = 270;
-                            _nextToTheWall = true;
-                            RunMode = Enums.RobotRunMode.Turn;
+                                await Task.Delay(LOOP_WAIT_TIME);
+                            }
                         }
 
                         // Continues straight, till wall makes turn. Tries to follow it smoothly
@@ -145,19 +153,35 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     rightSensor < IDEAL_RIGHT_SENSOR_DISTANCE + margin)
                                 {
                                     ControlMotors(100, 100);
+                                    await Task.Delay(LOOP_WAIT_TIME);
                                 }
                                 // Wall turns 90 degrees or more
-                                // TODO
-                                // Wall not seen on right anymore
-                                // TODO
-
-                                // Turn smoothly
-                                else
+                                else if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
                                 {
-                                    MakeSmoothOrientationCorrection(rightSensor, margin);
+                                    if (sensorValues[Enums.Sensor.FrontSensor] < sensorValues[Enums.Sensor.RightSensor])
+                                    {
+                                        Turn90Degrees(false).Wait();
+                                    }
+                                    else
+                                    {
+                                        ControlMotors(100, 100);
+                                        await Task.Delay(LOOP_WAIT_TIME);
+                                    }
                                 }
 
-                                await Task.Delay(LOOP_WAIT_TIME);
+                                // Wall not seen on right anymore
+                                else if (!IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
+                                {
+                                    RunMode = Enums.RobotRunMode.FindWall;
+                                }
+
+                                // Turn "smoothly"
+                                else
+                                {
+                                    MakeRoughOrientationCorrection(rightSensor, margin);
+                                    await Task.Delay(LOOP_WAIT_TIME);
+                                }
+
                             }
 
                         }
@@ -179,12 +203,15 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     degrees -= 360;
 
                                 RotateRobot(degrees).Wait();
+                                _turningDegrees = 0;
                             }
                         }
-                        else if (RunMode == Enums.RobotRunMode.Turn90)
-                        {
-                            //TODO
-                        }
+                        //else if (RunMode == Enums.RobotRunMode.Turn90)
+                        //{
+                        //    //TODO
+                        //}
+
+                        await Task.Delay(LOOP_WAIT_TIME);
                     } 
                 }
                 catch (Exception)
@@ -203,6 +230,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         private async Task RotateRobot(double degrees)
         {
             ControlMotors(0, 0);
+            double margin = 5;
 
             var sensorValues = _mutualData.ReadFilteredData();
             bool clockwise = false;
@@ -211,15 +239,28 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 clockwise = true;
             }
 
+            // Start with rough turn
+            // 13,33 seconds stands for 360 degrees
+            ControlMotors(100, 0, clockwise);
+            await Task.Delay((int)(degrees/360)*13333);
+
             // Rotate till only right sensor sees something
+            // Optimal distance when right sensor reading is 30
             if (_nextToTheWall)
             {
-                // TODO: needs testing how fast robot rotates
-                while (! IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]) && !_stopped)
+                while (!_stopped)
                 {
-                    ControlMotors(0, -100, clockwise);
+                    ControlMotors(100, 0, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
-                    await Task.Delay(500);
+
+                    if (sensorValues[Enums.Sensor.RightSensor] > IDEAL_RIGHT_SENSOR_DISTANCE - margin
+                        && sensorValues[Enums.Sensor.RightSensor] < IDEAL_RIGHT_SENSOR_DISTANCE + margin
+                        && sensorValues[Enums.Sensor.FrontSensor] > sensorValues[Enums.Sensor.RightSensor])
+                    {
+                        break;
+                    }
+                    
+                    await Task.Delay(LOOP_WAIT_TIME);
                 }
 
                 RunMode = Enums.RobotRunMode.FollowWall;
@@ -228,10 +269,9 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             // Rotate till the front sensor has closer range than left or right
             else
             {
-                // TODO: needs testing how fast robot rotates
                 while (! _stopped) // just in case
                 {
-                    ControlMotors(0, -100, clockwise);
+                    ControlMotors(100, 0, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
 
                     if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
@@ -243,50 +283,41 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         }
                     }
 
-                    await Task.Delay(500);
+                    await Task.Delay(LOOP_WAIT_TIME);
                 }
 
                 RunMode = Enums.RobotRunMode.FindWall;
             }
         }
 
+
+        private async Task Turn90Degrees(bool clockwise = true)
+        {
+            // Turning 360 degrees takes 13.33 seconds
+            ControlMotors(100, 0, clockwise);
+            await Task.Delay(3333);
+        }
+
         /// <summary>
-        /// 
+        /// Right sensor values is out of ideal distance (+ margin). Give turning command
         /// </summary>
         /// <param name="rightSensorValue"></param>
         /// <returns></returns>
-        private void MakeSmoothOrientationCorrection(double rightSensorValue, double margin)
+        private void MakeRoughOrientationCorrection(double rightSensorValue, double margin)
         {
-            // Turn right
-            if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin*4)
-            {
-                ControlMotors(100, 40);
-            }
-            else if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin*2)
-            {
-                ControlMotors(100, 70);
-            }
-            else if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin)
-            {
-                ControlMotors(100, 80);
-            }
-            // Turn left
-            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*8)
+            // Turning 360 degrees takes 13.33 seconds
+
+            // Turn counterclockwise
+            if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin)
             {
                 ControlMotors(0, 100);
             }
-            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*4)
+            // Clockwise
+            else if (rightSensorValue > IDEAL_RIGHT_SENSOR_DISTANCE + margin)
             {
-                ControlMotors(40, 100);
+                ControlMotors(100, 0);
             }
-            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin*2)
-            {
-                ControlMotors(70, 100);
-            }
-            else if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin)
-            {
-                ControlMotors(80, 100);
-            }
+            
         }
 
         private Enums.RobotRunMode AnalyzeSensorsWhenIdle(Dictionary<Enums.Sensor, double> sensorValues)
@@ -350,7 +381,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// <returns></returns>
         private bool IsSensorValueInReach(double sensorValue)
         {
-            //TODO: need limits for sensor values
             if (sensorValue > SENSOR_BOTTOM_LIMIT && sensorValue < SENSOR_TOP_LIMIT)
             {
                 return true;
