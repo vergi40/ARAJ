@@ -11,10 +11,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     {
         public const int LOOP_WAIT_TIME = 100;
 
-        public const int TRAVEL_DISTANCE_FROM_WALL = 30; // cm
+        public const int TRAVEL_DISTANCE_FROM_WALL = 45; // cm
         public const int SENSOR_TOP_LIMIT = 80; // cm
         public const int SENSOR_BOTTOM_LIMIT = 10; // cm
-        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 30;
+        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 40;
 
         public const int SIDESENSOR_ANGLE = 40;
 
@@ -80,7 +80,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             var sensorValues = _mutualData.ReadFilteredData();
 
                             // Make decision based on the data
-                            RunMode = AnalyzeSensorsWhenIdle(sensorValues);
+                            //RunMode = AnalyzeSensorsWhenIdle(sensorValues);
+                            RunMode = Enums.RobotRunMode.FollowWall;
                         }
 
                         // Robot doesn't see a wall, run forward till it does.
@@ -139,47 +140,48 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         {
                             Debug.WriteLine("Run mode: Follow wall");
 
-                            int margin = 5;
+                            int margin = 10;
 
                             while (!_stopped)
                             {
                                 var sensorValues = _mutualData.ReadFilteredData();
                                 double rightSensor = sensorValues[Enums.Sensor.RightSensor];
 
+                                
+                                // Wall turns 90 degrees or more
+                                if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
+                                {
+                                    //if (sensorValues[Enums.Sensor.FrontSensor]-10 < sensorValues[Enums.Sensor.RightSensor])
+                                    if (sensorValues[Enums.Sensor.FrontSensor] < 50)
+                                    {
+                                        Turn90Degrees(false).Wait();
+                                        continue;
+                                    }
+                                }
                                 // Continue straight if right sensor shows optimal reading
                                 // and front sensor sees nothing
-                                if (! IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]) &&
-                                    rightSensor > IDEAL_RIGHT_SENSOR_DISTANCE - margin &&
+                                if (rightSensor > IDEAL_RIGHT_SENSOR_DISTANCE - margin &&
                                     rightSensor < IDEAL_RIGHT_SENSOR_DISTANCE + margin)
                                 {
                                     ControlMotors(100, 100);
                                     await Task.Delay(LOOP_WAIT_TIME);
                                 }
-                                // Wall turns 90 degrees or more
-                                else if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
-                                {
-                                    if (sensorValues[Enums.Sensor.FrontSensor] < sensorValues[Enums.Sensor.RightSensor])
-                                    {
-                                        Turn90Degrees(false).Wait();
-                                    }
-                                    else
-                                    {
-                                        ControlMotors(100, 100);
-                                        await Task.Delay(LOOP_WAIT_TIME);
-                                    }
-                                }
 
                                 // Wall not seen on right anymore
-                                else if (!IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
-                                {
-                                    RunMode = Enums.RobotRunMode.FindWall;
-                                }
+                                //else if (!IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
+                                //{
+                                //    RunMode = Enums.RobotRunMode.FindWall;
+                                //}
 
                                 // Turn "smoothly"
                                 else
                                 {
                                     MakeRoughOrientationCorrection(rightSensor, margin);
-                                    await Task.Delay(LOOP_WAIT_TIME);
+                                    double i = Math.Abs(rightSensor - IDEAL_RIGHT_SENSOR_DISTANCE)/4;
+                                    await Task.Delay((int)(LOOP_WAIT_TIME*i));
+
+                                    ControlMotors(100,100);
+                                    await Task.Delay(LOOP_WAIT_TIME*3);
                                 }
 
                             }
@@ -230,7 +232,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         private async Task RotateRobot(double degrees)
         {
             ControlMotors(0, 0);
-            double margin = 5;
+            double margin = 10;
 
             var sensorValues = _mutualData.ReadFilteredData();
             bool clockwise = false;
@@ -241,8 +243,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
             // Start with rough turn
             // 13,33 seconds stands for 360 degrees
-            ControlMotors(100, 0, clockwise);
-            await Task.Delay((int)(degrees/360)*13333);
+            //ControlMotors(0, -100, clockwise);
+            //await Task.Delay((int)(degrees/360)*13333);
 
             // Rotate till only right sensor sees something
             // Optimal distance when right sensor reading is 30
@@ -250,7 +252,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             {
                 while (!_stopped)
                 {
-                    ControlMotors(100, 0, clockwise);
+                    ControlMotors(0, -100, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
 
                     if (sensorValues[Enums.Sensor.RightSensor] > IDEAL_RIGHT_SENSOR_DISTANCE - margin
@@ -271,7 +273,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             {
                 while (! _stopped) // just in case
                 {
-                    ControlMotors(100, 0, clockwise);
+                    ControlMotors(0, -100, clockwise);
                     sensorValues = _mutualData.ReadFilteredData();
 
                     if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
@@ -305,8 +307,6 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         /// <returns></returns>
         private void MakeRoughOrientationCorrection(double rightSensorValue, double margin)
         {
-            // Turning 360 degrees takes 13.33 seconds
-
             // Turn counterclockwise
             if (rightSensorValue < IDEAL_RIGHT_SENSOR_DISTANCE - margin)
             {

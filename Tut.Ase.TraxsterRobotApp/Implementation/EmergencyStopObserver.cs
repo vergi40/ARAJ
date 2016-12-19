@@ -59,7 +59,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             Debug.WriteLine(sensor.Key);
                             Debug.WriteLine(sensor.Value);
                             // Check if sensor value (distance from wall) is too small
-                            if (sensor.Value < SAFETY_DISTANCE)
+                            if (sensor.Value < SAFETY_DISTANCE && sensor.Key != Enums.Sensor.RearSensor)
                             {
                                 Debug.WriteLine("EMERGENCY STATE");
                                 // MainLogic will see this

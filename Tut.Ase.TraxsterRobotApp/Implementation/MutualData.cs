@@ -8,7 +8,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 {
     class MutualData
     {
-        public const int FILTER_BUFFER_SIZE = 3;
+        public const int FILTER_BUFFER_SIZE = 2;
         private readonly Robot _robot;
         private Queue<Dictionary<Enums.Sensor, int>> _rawSensorValuesQueue;
         private Dictionary<Enums.Sensor, double> _filteredSensorValues;
@@ -51,9 +51,10 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
             int frontSensor = 0;
             int rightSensor = 0;
             int rearSensor = 0;
+            int tryTimes = 4;
 
             // Try to read each sensor separately
-            for (int i=0;i<3;i++)
+            for (int i=0;i<tryTimes;i++)
             {
                 // Very eager to throw exceptions
                 try
@@ -68,7 +69,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
             }
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < tryTimes; i++)
             {
                 // Very eager to throw exceptions
                 try
@@ -83,7 +84,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
             }
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < tryTimes; i++)
             {
                 // Very eager to throw exceptions
                 try
@@ -98,26 +99,27 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
             }
 
-            for (int i = 0; i < 3; i++)
-            {
-                // Very eager to throw exceptions
-                try
-                {
-                    // Read raw values and save them to mutual data
-                    rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
-                    break;
-                }
-                catch (Exception e)
-                {
-                    // Catch random generated exceptions
-                }
-            }
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    // Very eager to throw exceptions
+            //    try
+            //    {
+            //        // Read raw values and save them to mutual data
+            //        rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
+            //        break;
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        // Catch random generated exceptions
+            //    }
+            //}
 
             Dictionary<Enums.Sensor, int> rawSensorValues = new Dictionary<Enums.Sensor, int>();
             rawSensorValues[Enums.Sensor.LeftSensor] = leftSensor;
             rawSensorValues[Enums.Sensor.FrontSensor] = frontSensor;
             rawSensorValues[Enums.Sensor.RightSensor] = rightSensor;
-            rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
+            //rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
+            rawSensorValues[Enums.Sensor.RearSensor] = 200;
 
             _rawSensorValuesQueue.Enqueue(rawSensorValues);
 

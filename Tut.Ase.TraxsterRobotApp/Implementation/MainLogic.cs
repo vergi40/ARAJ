@@ -51,7 +51,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
                         // Shut down / reset the threads
                         movementFunctions.Stop();
-                        sensorReader.Stop();
+                        //sensorReader.Stop();
                         observer.Stop();
 
                     }
@@ -90,7 +90,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
 
                             // Shut down / reset the threads
                             movementFunctions.Stop();
-                            sensorReader.Stop();
+                            //sensorReader.Stop();
                             observer.Stop();
 
                             continue;
