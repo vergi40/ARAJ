@@ -154,8 +154,21 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     //if (sensorValues[Enums.Sensor.FrontSensor]-10 < sensorValues[Enums.Sensor.RightSensor])
                                     if (sensorValues[Enums.Sensor.FrontSensor] < 50)
                                     {
-                                        Turn90Degrees(false).Wait();
-                                        continue;
+                                        Debug.WriteLine("Wall in front, turning left.");
+                                        //Turn90Degrees(false).Wait();
+                                        //continue;
+                                        while (sensorValues[Enums.Sensor.FrontSensor] < 50 && ! _stopped)
+                                        {
+                                            ControlMotors(0, 100);
+                                            await Task.Delay((int)(LOOP_WAIT_TIME));
+
+                                            //ControlMotors(100, 100);
+                                            //await Task.Delay(LOOP_WAIT_TIME);
+                                            sensorValues = _mutualData.ReadFilteredData();
+
+                                        }
+
+                                        Debug.WriteLine("Driving forward.");
                                     }
                                 }
                                 // Continue straight if right sensor shows optimal reading
@@ -178,6 +191,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                 {
                                     MakeRoughOrientationCorrection(rightSensor, margin);
                                     double i = Math.Abs(rightSensor - IDEAL_RIGHT_SENSOR_DISTANCE)/4;
+                                    i = Math.Max(i, 10);
                                     await Task.Delay((int)(LOOP_WAIT_TIME*i));
 
                                     ControlMotors(100,100);
