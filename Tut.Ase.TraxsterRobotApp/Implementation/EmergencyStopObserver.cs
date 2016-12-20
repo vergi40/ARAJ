@@ -10,7 +10,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
     class EmergencyStopObserver
     {
         public const int LOOP_WAIT_TIME = 100;
-        public const int SAFETY_DISTANCE = 20;
+        public const int SAFETY_DISTANCE = 17;
 
         private Robot _robot;
         private bool _stopped;
@@ -65,7 +65,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                 // MainLogic will see this
                                 IsEmergencyStopEncountered = true;
 
-                                for (int i = 0; i < 5; i++)
+                                for (int i = 0; i < 10; i++)
                                 {
                                     try
                                     {
@@ -77,7 +77,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                     {
                                         // Catch random exceptions
                                     }
-                                    await Task.Delay(50);
+                                    await Task.Delay(100);
                                 }
 
                                 break;

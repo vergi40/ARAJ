@@ -14,7 +14,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         public const int TRAVEL_DISTANCE_FROM_WALL = 45; // cm
         public const int SENSOR_TOP_LIMIT = 80; // cm
         public const int SENSOR_BOTTOM_LIMIT = 10; // cm
-        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 40;
+        public const int IDEAL_RIGHT_SENSOR_DISTANCE = 40; //cm
 
         public const int SIDESENSOR_ANGLE = 40;
 
@@ -54,7 +54,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
         {
             while (true)
             {
-                await Task.Delay(LOOP_WAIT_TIME);
+               // await Task.Delay(LOOP_WAIT_TIME);
 
                 try
                 {
@@ -62,6 +62,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                     if (_stopped)
                     {
                         Debug.WriteLine("Stopped");
+                        await Task.Delay(500);
                     }
                     // Run logic
                     else
@@ -75,13 +76,20 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             Debug.WriteLine("Run mode: Idle");
                             // Wait a moment to acquire enough reliable sensor data
                             await Task.Delay(1500);
-                        
+
                             // Read filtered sensor values
                             var sensorValues = _mutualData.ReadFilteredData();
 
                             // Make decision based on the data
                             //RunMode = AnalyzeSensorsWhenIdle(sensorValues);
-                            RunMode = Enums.RobotRunMode.FollowWall;
+                            if (IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
+                            {
+                                RunMode = Enums.RobotRunMode.FollowWall;
+                            }
+                            else
+                            {
+                                RunMode = Enums.RobotRunMode.FindWall;
+                            }
                         }
 
                         // Robot doesn't see a wall, run forward till it does.
@@ -93,6 +101,41 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             // Read filtered sensor values
                             var sensorValues = _mutualData.ReadFilteredData();
                             double margin = 5;
+                            if (IsSensorValueInReach(sensorValues[Enums.Sensor.LeftSensor]))
+                            {
+                                ControlMotors(0, 100);
+                                await Task.Delay(2000); // Turn 40
+                            }
+                            else if (IsSensorValueInReach(sensorValues[Enums.Sensor.RearSensor]))
+                            {
+                                ControlMotors(0, 100);
+                                await Task.Delay(6000); // Turn 180
+                            }
+
+                            while (!_stopped && !IsSensorValueInReach(sensorValues[Enums.Sensor.RightSensor]))
+                            {
+                                sensorValues = _mutualData.ReadFilteredData();
+
+                                if (sensorValues[Enums.Sensor.FrontSensor] < 70)
+                                {
+                                    ControlMotors(0, 100);
+                                    await Task.Delay(1000);
+                                }
+                                else if (sensorValues[Enums.Sensor.LeftSensor] < 70)
+                                {
+                                    ControlMotors(0, 100);
+                                    await Task.Delay(1500);
+                                }
+                                else
+                                {
+                                    ControlMotors(100, 100);
+                                    await Task.Delay(100);
+                                }
+                            }
+                            RunMode = Enums.RobotRunMode.FollowWall;
+                            continue;
+
+
                             while (!_stopped)
                             {
                                 ControlMotors(100, 100);
@@ -141,7 +184,8 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                             Debug.WriteLine("Run mode: Follow wall");
 
                             int margin = 10;
-
+                            bool tightTurnDone = false;
+                            
                             while (!_stopped)
                             {
                                 var sensorValues = _mutualData.ReadFilteredData();
@@ -152,24 +196,22 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                 if (IsSensorValueInReach(sensorValues[Enums.Sensor.FrontSensor]))
                                 {
                                     //if (sensorValues[Enums.Sensor.FrontSensor]-10 < sensorValues[Enums.Sensor.RightSensor])
-                                    if (sensorValues[Enums.Sensor.FrontSensor] < 50)
+                                    
+                                    Debug.WriteLine("Wall in front, turning left.");
+                                    //continue;
+                                    while (sensorValues[Enums.Sensor.FrontSensor] < 50 && ! _stopped)
                                     {
-                                        Debug.WriteLine("Wall in front, turning left.");
-                                        //Turn90Degrees(false).Wait();
-                                        //continue;
-                                        while (sensorValues[Enums.Sensor.FrontSensor] < 50 && ! _stopped)
-                                        {
-                                            ControlMotors(0, 100);
-                                            await Task.Delay((int)(LOOP_WAIT_TIME));
+                                        ControlMotors(0, 100);
+                                        await Task.Delay((int)(LOOP_WAIT_TIME));
 
-                                            //ControlMotors(100, 100);
-                                            //await Task.Delay(LOOP_WAIT_TIME);
-                                            sensorValues = _mutualData.ReadFilteredData();
+                                        //ControlMotors(100, 100);
+                                        //await Task.Delay(LOOP_WAIT_TIME);
+                                        sensorValues = _mutualData.ReadFilteredData();
 
-                                        }
-
-                                        Debug.WriteLine("Driving forward.");
                                     }
+
+                                    Debug.WriteLine("Driving forward.");
+                                    
                                 }
                                 // Continue straight if right sensor shows optimal reading
                                 // and front sensor sees nothing
@@ -185,17 +227,25 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                                 //{
                                 //    RunMode = Enums.RobotRunMode.FindWall;
                                 //}
+                                else if (!IsSensorValueInReach(rightSensor) && !tightTurnDone)
+                                {
+                                    ControlMotors(100, 100);
+                                    tightTurnDone = true;
+                                    await Task.Delay(350);
+                                }
 
                                 // Turn "smoothly"
                                 else
                                 {
                                     MakeRoughOrientationCorrection(rightSensor, margin);
                                     double i = Math.Abs(rightSensor - IDEAL_RIGHT_SENSOR_DISTANCE)/4;
-                                    i = Math.Max(i, 10);
+                                    i = Math.Min(i, 10);
                                     await Task.Delay((int)(LOOP_WAIT_TIME*i));
 
                                     ControlMotors(100,100);
                                     await Task.Delay(LOOP_WAIT_TIME*3);
+
+                                    tightTurnDone = false;
                                 }
 
                             }
