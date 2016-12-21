@@ -15,9 +15,7 @@
         public enum RobotRunMode
         {
             FindWall,
-            Turn,
             FollowWall,
-            Turn90,
             Idle
         };
 

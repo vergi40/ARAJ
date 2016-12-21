@@ -1,2 +1,141 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram /> 
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Tut.Ase.TraxsterRobotApp.App" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAQAAIAAA=</HashCode>
+      <FileName>App.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.AppLogic" Collapsed="true">
+    <Position X="2.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AppLogic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.ByteConverter" Collapsed="true">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ByteConverter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.DeviceConstants" Collapsed="true">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAggAAAAAAACAAAAAAAAAAAAACIQAAAAEAIAAAAA=</HashCode>
+      <FileName>DeviceConstants.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.GertbotGeneral" Collapsed="true">
+    <Position X="4" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiAQAAAAAAAgQAAAAAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>GertbotGeneral.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.GertbotUartController" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="5.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACgAAEAAAAAABEgAAAIAAABAAoIAAAgAAAA=</HashCode>
+      <FileName>GertbotUartController.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.GpioController" Collapsed="true">
+    <Position X="7.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAQAAAAAgAQAAAAAQAAAAAAAAAAAJAAAAAAQARAAA=</HashCode>
+      <FileName>GpioController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.EmergencyStopException" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Implementation\Exceptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.MainPage" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>kCAAEoAIBDAAAAQ4ICAAUAQAgFACAAAIgCMIABhiAAA=</HashCode>
+      <FileName>MainPage.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.MotorController" Collapsed="true">
+    <Position X="4" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AkAAAQECAAAEBACCAAgAAAAAAAAQAQIAAAAAAAIBAAA=</HashCode>
+      <FileName>MotorController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Robot" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAQQAAACoAAAAAgAAAAAAAAEgACAQEAAAAAAAQgAA=</HashCode>
+      <FileName>Robot.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.SensorController" Collapsed="true">
+    <Position X="2.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SensorController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.EmergencyStopObserver" Collapsed="true">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAgBAAAAAAAEAIAAAAFAAEAAAAAAAAAIAAAAAAAAAI=</HashCode>
+      <FileName>Implementation\EmergencyStopObserver.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.Enums" Collapsed="true">
+    <Position X="2.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Implementation\Enums.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.MainLogic" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAgAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>Implementation\MainLogic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.MovementFunctionality">
+    <Position X="5.75" Y="2.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AEAgBAwIAAAAECAAAAAFAAAAAAAgAAAAIAAAEEAAAAI=</HashCode>
+      <FileName>Implementation\MovementFunctionality.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.MutualData" Collapsed="true">
+    <Position X="7.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQABAgAAAAAAAAAACABAAAAAACAAAAgAAAACAAAAAA=</HashCode>
+      <FileName>Implementation\MutualData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Tut.Ase.TraxsterRobotApp.Implementation.SensorReader" Collapsed="true">
+    <Position X="4" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAgBAAAAAAAAAAAAAAEAAAAABAAAAAAIAAAAAAAAAI=</HashCode>
+      <FileName>Implementation\SensorReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Tut.Ase.TraxsterRobotApp.IUiDataSync" Collapsed="true">
+    <Position X="0.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAgAAAAAgAAAAAAAAAAgAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>IUiDataSync.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

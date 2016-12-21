@@ -99,27 +99,27 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                 }
             }
 
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    // Very eager to throw exceptions
-            //    try
-            //    {
-            //        // Read raw values and save them to mutual data
-            //        rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
-            //        break;
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        // Catch random generated exceptions
-            //    }
-            //}
+            for (int i = 0; i < 3; i++)
+            {
+                // Very eager to throw exceptions
+                try
+                {
+                    // Read raw values and save them to mutual data
+                    rearSensor = await _robot.getSensorValue(DeviceConstants.REAR_SENSOR_ID);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    // Catch random generated exceptions
+                }
+            }
 
             Dictionary<Enums.Sensor, int> rawSensorValues = new Dictionary<Enums.Sensor, int>();
             rawSensorValues[Enums.Sensor.LeftSensor] = leftSensor;
             rawSensorValues[Enums.Sensor.FrontSensor] = frontSensor;
             rawSensorValues[Enums.Sensor.RightSensor] = rightSensor;
-            //rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
-            rawSensorValues[Enums.Sensor.RearSensor] = 200;
+            rawSensorValues[Enums.Sensor.RearSensor] = rearSensor;
+            //rawSensorValues[Enums.Sensor.RearSensor] = 200;
 
             _rawSensorValuesQueue.Enqueue(rawSensorValues);
 

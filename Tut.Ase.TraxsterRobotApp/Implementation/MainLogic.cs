@@ -147,7 +147,7 @@ namespace Tut.Ase.TraxsterRobotApp.Implementation
                         {
                             rightLedState = false;
                         }
-                        // Findwall, Turn -modes right led blinking
+                        // FindWall -mode right led blinking
                         else
                         {
                             if (rightLedState)
